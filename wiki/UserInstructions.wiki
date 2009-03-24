@@ -1,5 +1,5 @@
+#summary Instruction for using RadioStation.ForMe (rs.fm)
 #labels Featured
-#Instruction for using RadioStation.ForMe (rs.fm)
 
 = Introduction =
 
