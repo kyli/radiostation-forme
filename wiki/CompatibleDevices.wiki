@@ -1,5 +1,5 @@
+#summary A list of compatible devices (under construction)
 #labels Featured,Phase-Support
-#A list of compatible devices (under construction)
 
 = Introduction =
 
