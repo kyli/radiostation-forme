@@ -3,7 +3,7 @@
 
 = Introduction =
 
-RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at no cost.
+RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at no cost. *Last.fm has just announced that its radio services will no longer be free. You must subscribe in order to use its radio services.*
 
 = Details =
 
