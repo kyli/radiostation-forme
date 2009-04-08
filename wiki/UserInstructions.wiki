@@ -3,7 +3,7 @@
 
 = Introduction =
 
-RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at no cost. *Last.fm has just announced that its radio services will no longer be free. You must subscribe in order to use its personalized radio services. However, other web services including scrobbling is still offered free of charge.*
+RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at ~~no cost~~. *Last.fm has just announced that its radio services will no longer be free. You must subscribe in order to use its personalized radio services.*
 
 = Details =
 
@@ -17,4 +17,4 @@ Provide your Last.fm user information, and then click OK.
 
 You are now connected! You can now tune to your favourite station, and select play to start playing. 
 
-Happy Scrobbling!
+Happy Listening!
