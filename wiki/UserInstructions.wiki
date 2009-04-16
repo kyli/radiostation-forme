@@ -3,13 +3,13 @@
 
 = Introduction =
 
-RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at ~~no cost~~. *Last.fm has just announced that its radio services will no longer be free. You must subscribe in order to use its personalized radio services.*
+RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at ~~no cost~~. *Last.fm has just announced that its radio services will no longer be free. You must subscribe in order to use its personalized radio services.* However, a non-subscriber user will be able to listen to a maximum number of 30 songs, before trial period runs out.
 
 = Details =
 
 Find RadioStation.ForMe from your list of installed apps.
 
-You should now see the main screen of rs.fm, as provided below.
+You should now see the main screen of rs.fm, as provided below. If you are a first time user, handshake to Last.fm server will respond with "Missing user information". You will have to provide your user name and password before listen to radio.
 
 Now press the home key, select settings.
 
