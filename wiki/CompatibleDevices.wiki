@@ -13,7 +13,7 @@ Currently rs.fm provides only single layout orientation. For models with narrowe
 
 There are two known firmware bugs with earlier BlackBerry devices (BlackBerry 8xxx)
  * Occupationally, connection to Last.fm server may die out and become unresponsive. rs.fm has a Timeout Watcher that terminates dead connections and continues with the next available track. It does so by first receiving certain notifications from the player, and then determines if the connection is dead after a limited period of time. But in BlackBerry 8xxx, `javax.microedition.media.Player` does not fire `bufferingStart` event as expected. Therefore, there this mechanism does not work in those devices. Whenever there is a connection error, a user must manually skip the current track.
- * Sound quality in BlackBerry 9000 is better than 8xxx. This may be either a hardware issue or bug in firmware.
+ * Sound quality in BlackBerry 9000 is better than 8xxx. This may be caused by either a hardware improvement or firmware upgrade.
 
 
 = Detailed List =
