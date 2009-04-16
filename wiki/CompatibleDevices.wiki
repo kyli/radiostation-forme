@@ -7,12 +7,12 @@ RadioStation.ForMe (rs.fm) is developed using JDE 4.5.0, therefore should be com
 
 == Known Issues ==
 
-RadioStation.ForMe (rs.fm) is designed and tested mostly BlackBerry Bold. Though it should work on any BlackBerry device v4.5 and up, there are several problems you should be aware of.
+RadioStation.ForMe (rs.fm) is tested mostly on BlackBerry Bold. Though it should work on any BlackBerry device v4.5 and up, there are several problems you should be aware of.
 
-Currently rs.fm provides only single direction layout. For models with narrower/slimmer screens, rs.fm may not fit as you would expect. rs.fm is best displayed in landscape.
+Currently rs.fm provides only single layout orientation. For models with narrower/slimmer screens, rs.fm may not fit as beautifully as you would expect. rs.fm is best displayed in landscape orientation (wide screens).
 
-There are two known bugs in firmware with earlier BlackBerry devices (BlackBerry 8xxx)
- * Occupationally, connection to Last.fm server may hang. rs.fm has a Timeout Watcher that terminates dead connections and continues to stream the next track. It does so by first receiving certain notifications from the player, and then determines if the connection is dead after a limited period of time. But in BlackBerry 8xxx, javax.microedition.media.Player does not fire bufferingStart event as expected. Therefore, there this mechanism does not work in those devices. Whenever there is a connection error, a user must manually skip the current track.
+There are two known firmware bugs with earlier BlackBerry devices (BlackBerry 8xxx)
+ * Occupationally, connection to Last.fm server may die out and become unresponsive. rs.fm has a Timeout Watcher that terminates dead connections and continues with the next available track. It does so by first receiving certain notifications from the player, and then determines if the connection is dead after a limited period of time. But in BlackBerry 8xxx, `javax.microedition.media.Player` does not fire `bufferingStart` event as expected. Therefore, there this mechanism does not work in those devices. Whenever there is a connection error, a user must manually skip the current track.
  * Sound quality in BlackBerry 9000 is better than 8xxx. This may be either a hardware issue or bug in firmware.
 
 
