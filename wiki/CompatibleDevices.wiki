@@ -11,9 +11,9 @@ RadioStation.ForMe (rs.fm) is designed and tested mostly BlackBerry Bold. Though
 
 Currently rs.fm provides only single direction layout. For models with narrower/slimmer screens, rs.fm may not fit as you would expect. rs.fm is best displayed in landscape.
 
-There are two known bugs in firmware with earlier BlackBerry devices (BlackBerry 8***)
-*Occupationally, connection to Last.fm server may hang. rs.fm has a Timeout Watcher that terminates dead connections and continues to stream the next track. It does so by first receiving certain notifications from the player, and then determines if the connection is dead after a limited period of time. But in BlackBerry 8***, javax.microedition.media.Player does not fire bufferingStart event as expected. Therefore, there this mechanism does not work in those devices. Whenever there is a connection error, a user must manually skip the current track.
-*Sound quality in BlackBerry 9000 is better than 8***. This may be either a hardware issue or bug in firmware.
+There are two known bugs in firmware with earlier BlackBerry devices (BlackBerry 8xxx)
+* Occupationally, connection to Last.fm server may hang. rs.fm has a Timeout Watcher that terminates dead connections and continues to stream the next track. It does so by first receiving certain notifications from the player, and then determines if the connection is dead after a limited period of time. But in BlackBerry 8xxx, javax.microedition.media.Player does not fire bufferingStart event as expected. Therefore, there this mechanism does not work in those devices. Whenever there is a connection error, a user must manually skip the current track.
+* Sound quality in BlackBerry 9000 is better than 8xxx. This may be either a hardware issue or bug in firmware.
 
 
 = Detailed List =
