@@ -56,13 +56,13 @@
 	</target>
 
 	<target name="load" depends="sign">
-		<exec executable="${jde.home}/bin/JavaLoader.exe" dir="${dist.dir}">
+		<exec executable="${jde.home}/bin/JavaLoader.exe" dir="${build.dir}">
 			<arg line="-u load ${cod.name}.cod" />
 		</exec>
 	</target>
 
 	<target name="unload">
-		<exec executable="${jde.home}/bin/JavaLoader.exe" dir="${dist.dir}">
+		<exec executable="${jde.home}/bin/JavaLoader.exe" dir="${build.dir}">
 			<arg line="-u erase -f ${cod.name}.cod" />
 		</exec>
 	</target>
