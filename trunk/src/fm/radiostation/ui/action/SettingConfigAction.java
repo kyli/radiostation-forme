@@ -30,7 +30,7 @@ import net.rim.device.api.ui.component.DialogClosedListener;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.PasswordEditField;
 import net.rim.device.api.ui.component.TextField;
-import fm.radiostation.ConnectionManager;
+import fm.radiostation.UrlFactory;
 import fm.radiostation.RSFMSession;
 import fm.radiostation.ui.RSFMResource;
 
@@ -38,7 +38,7 @@ public class SettingConfigAction extends AbstractRSFMAction implements DialogClo
 
 	private PasswordEditField password;
 	private TextField username;
-	private CheckboxField useWifi;
+	private CheckboxField forceWifi;
 
 	public SettingConfigAction(RSFMSession rsfmSession) {
 		super(rsfmSession);
@@ -64,9 +64,9 @@ public class SettingConfigAction extends AbstractRSFMAction implements DialogClo
 		password.setLabel(bsrb.getString(19)+": ");
 		settings.add(password);
 		
-		useWifi = new CheckboxField(bsrb.getString(17), ConnectionManager.getUseWifi());
-		useWifi.setFont(font);
-		settings.add(useWifi);
+		forceWifi = new CheckboxField(bsrb.getString(17), UrlFactory.forceWifi);
+		forceWifi.setFont(font);
+		settings.add(forceWifi);
 		
 		ButtonField clearAll = new ButtonField(bsrb.getString(20));
 		clearAll.setFont(font);
@@ -102,7 +102,7 @@ public class SettingConfigAction extends AbstractRSFMAction implements DialogClo
 			if (dialog.isDirty()) {
 				String name = username.getText();
 				String pwd = password.getText();
-				ConnectionManager.setUseWifi(useWifi.getChecked());
+				UrlFactory.forceWifi = forceWifi.getChecked();
 				rsfmSession.saveSettings(name, pwd);
 				rsfmSession.loadSettings();
 				Thread th = new Thread() {

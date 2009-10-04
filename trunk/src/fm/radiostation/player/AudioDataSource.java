@@ -31,7 +31,7 @@ import javax.microedition.media.protocol.DataSource;
 import javax.microedition.media.protocol.SourceStream;
 
 import net.rim.device.api.io.SharedInputStream;
-import fm.radiostation.ConnectionManager;
+import fm.radiostation.UrlFactory;
 import fm.radiostation.RSFMUtils;
 import fm.radiostation.Track;
 
@@ -66,6 +66,10 @@ import fm.radiostation.Track;
 public class AudioDataSource extends DataSource {
 	
 	private ContentConnection dataConnection;
+	private UrlFactory servicemaster = 
+		new UrlFactory(new int[] {UrlFactory.TRANSPORT_DIRECT_TCP, 
+				UrlFactory.TRANSPORT_WAP2, 
+				UrlFactory.TRANSPORT_WIFI, });
 	
 	private InputStream readStream;
 	private AudioSourceStream feedToPlayer;
@@ -80,7 +84,7 @@ public class AudioDataSource extends DataSource {
 	 */
 	public void connect() throws IOException {
 		String iniRequestUrl = getLocator();//+";deviceside=true";
-		iniRequestUrl = ConnectionManager.addRimUrlConnectionParam(iniRequestUrl);
+		iniRequestUrl = servicemaster.appendRimConnectionParam(iniRequestUrl, ";ConnectionTimeout=60000");
 		RSFMUtils.debug("Initial request is made to: " + iniRequestUrl);
 		HttpConnection serverConnection = (HttpConnection) Connector.open(iniRequestUrl);
 	    
@@ -91,7 +95,7 @@ public class AudioDataSource extends DataSource {
 	    
 	    if (responseCode == HttpConnection.HTTP_MOVED_TEMP) {
 	    	String resourceLocation = serverConnection.getHeaderField("Location");
-	    	resourceLocation = ConnectionManager.addRimUrlConnectionParam(resourceLocation);
+	    	resourceLocation = servicemaster.appendRimConnectionParam(resourceLocation, ";ConnectionTimeout=60000");
 	    	if (resourceLocation == null) {
 	    		// track ticket expired, track not accessible
 	    		RSFMUtils.debug("Remote resouce url not found in response header");

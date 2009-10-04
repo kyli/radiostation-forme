@@ -54,17 +54,24 @@ import fm.radiostation.player.RadioPlayerEventListener;
  */
 public class RSFMSession implements RadioPlayerEventListener {
 	
+	/**
+	 * client identifier that identifies RadioStation.ForMe with last.fm
+	 */
 	private static final String CLIENT_ID = "rsf";
+	
+	/*
+	 * key to access persistent store. these keys are private keys and are
+	 * not provided as a part of the source code release
+	 */
 	private static String api_key;
 	private static String secret;
 	private static String settingsKey;
 	private static String queueSubmittingTracksKey;
-
-	private String username;
-	private String password;
-	private int failureCounter;
-	private long lastFailTime;
+	private Vector queuedSubmittingTracks;
 	
+	/*
+	 * load persistent access keys from file
+	 */
 	static {
 		try {
 			Hashtable ht = RSFMUtils.loadProperties(RSFMSession.class
@@ -78,17 +85,29 @@ public class RSFMSession implements RadioPlayerEventListener {
 			throw new RuntimeException("Error: Unable to load rsfm.keys.");
 		}
 	}
-	
-	private ConnectionManager connMan;
-	private RadioPlayer radioPlayer;
 
+	/*
+	 * static user session data
+	 */
+	private String username;
+	private String password;
+	private int failureCounter;
+	private long lastFailTime;
+	
+	/*
+	 * dynamic session data 
+	 */
 	private Radio radio;
 	private Playlist playlist;
 	private MobileSession mobileSession;
 	private HandshakeResponse handshake;
 	private String authToken;
 	
-	private Vector queuedSubmittingTracks;
+	/*
+	 * modules for http connection and streamed content
+	 */
+	private ConnectionManager connMan;
+	private RadioPlayer radioPlayer;
 	
 	public RSFMSession() {
 		connMan = new ConnectionManager();
@@ -112,9 +131,9 @@ public class RSFMSession implements RadioPlayerEventListener {
 				Boolean useWifi = (Boolean) currentinfo.get("useWifi");
 				if (useWifi == null) {
 					RSFMUtils.debug("useWifi setting not found, default to true and use wifi when possible.");
-					ConnectionManager.setUseWifi(true);
+					UrlFactory.forceWifi = false;
 				} else {
-					ConnectionManager.setUseWifi(useWifi.booleanValue());
+					UrlFactory.forceWifi = useWifi.booleanValue();
 				}
 			}
 		}
@@ -132,7 +151,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		RSFMHashMap userinfo = new RSFMHashMap(2);
 		userinfo.put("username", username);
 		userinfo.put("password", password);
-		userinfo.put("useWifi", new Boolean(ConnectionManager.getUseWifi()));
+		userinfo.put("useWifi", new Boolean(UrlFactory.forceWifi));
 		synchronized(store) {
 			store.setContents(userinfo); 
 			store.commit();
@@ -203,7 +222,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		fireStatusEvent(new StatusEvent(StatusEvent.GETTING_MOBILE_SESSION));
 
 		MobileSessionHandler handler = new MobileSessionHandler();
-		mobileSession = (MobileSession) connMan.getRESTResponse(api_key,
+		mobileSession = (MobileSession) connMan.getXMLResponse(api_key,
 				MobileSession.METHOD, params, handler,
 				HttpConnection.POST);
 		if (mobileSession != null && mobileSession.isSuccess()) {
@@ -377,7 +396,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 			
 			fireStatusEvent(new StatusEvent(StatusEvent.CONNECTING_TO_RADIO));
 			TuneResponseHandler handler = new TuneResponseHandler();
-			radio = (Radio) connMan.getRESTResponse(api_key,
+			radio = (Radio) connMan.getXMLResponse(api_key,
 					Radio.METHOD_RADIO_TUNE, params, handler,
 					HttpConnection.POST);
 			if (radio != null && radio.isSuccess()) {
@@ -422,7 +441,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		params.put("api_sig", api_sig);
 		
 		PlaylistHandler handler = new PlaylistHandler();
-		playlist = (Playlist) connMan.getRESTResponse(api_key,
+		playlist = (Playlist) connMan.getXMLResponse(api_key,
 				Radio.METHOD_RADIO_GETPLAYLIST, params, handler,
 				HttpConnection.POST);
 		if (playlist != null) {
@@ -573,7 +592,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		params.put("sk", sk);
 		
 		SimpleResponseHandler handler = new SimpleResponseHandler();
-		ResponseObject response = connMan.getRESTResponse(api_key, method, params, handler, HttpConnection.POST);
+		ResponseObject response = connMan.getXMLResponse(api_key, method, params, handler, HttpConnection.POST);
 		if (response != null && response.isSuccess()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.USER_PROFILE_UPDATED));
 			return true;
