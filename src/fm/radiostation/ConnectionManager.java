@@ -26,7 +26,6 @@ import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
-import net.rim.device.api.system.WLANInfo;
 import fm.radiostation.handler.ResponseHandler;
 
 /**
@@ -54,22 +53,37 @@ public final class ConnectionManager {
 	public static final String SUBMISSION_ROOT_URL = "http://post.audioscrobbler.com/";
 	public static final String SUBMISSION_HANDSHAKE = "?hs=true&p=1.2.1&";
 
-	private HttpConnection con;
+	private final UrlFactory servicemaster = 
+		new UrlFactory(UrlFactory.DEFAULT_TRANSPORT_ORDER);
 
-	public synchronized ResponseObject getRESTResponse(String api_key,
+	public ResponseObject getXMLResponse(String api_key,
 			String method, Hashtable params, ResponseHandler handler, String httpMethod) {
 		String url = buildRESTRequestUrl(method, api_key, params);
 		return getResponse(url, handler, httpMethod);
 	}
 
-	public synchronized ResponseObject getResponse(String url,
+	public ResponseObject getResponse(String url,
 			ResponseHandler handler, String httpMethod) {
-		con = null;
+		HttpConnection con = null;
 		InputStream in = null;
 		try {
-			url = addRimUrlConnectionParam(url);
+			url = servicemaster.appendRimConnectionParam(url, ";ConnectionTimeout=60000");
 			RSFMUtils.debug("Request sent to: "+url);
-			in = getHttpConnectionStream(url, httpMethod);
+			con = (HttpConnection) Connector.open(url);
+			con.setRequestMethod(httpMethod);
+
+			// HttpConnection state changes to Connected, getting the response
+			// code opens the connection.
+			int response = con.getResponseCode();
+			in = con.openInputStream();
+			if (response != HttpConnection.HTTP_OK) {
+				RSFMUtils.debug(con.getResponseMessage()
+						+ " HTTP response code: " + response);
+				int len = (int) con.getLength();
+				RSFMUtils.printRESTResponse(in, len);
+				throw new IOException();
+			}
+			
 //			int len = (int) con.getLength();
 //			RSFMUtils.printRESTResponse(in, len);
 			return handler.handle(in);
@@ -99,34 +113,6 @@ public final class ConnectionManager {
 	}
 
 	/**
-	 * Opens a HTTP Connection to the specified url with the specified HTTP Method
-	 * 
-	 * @param url
-	 *            a string URL for accessing a specific Last.fm API method
-	 * @param httpMethod
-	 *            a string HTTP method name, e.g. HEAD, GET, POST and etcetra.
-	 * @return InputStream opened by the HTTP connection
-	 */
-	private InputStream getHttpConnectionStream(String url, String httpMethod)
-			throws IOException {
-		con = (HttpConnection) Connector.open(url);
-		con.setRequestMethod(httpMethod);
-
-		// HttpConnection state changes to Connected, getting the response
-		// code opens the connection.
-		int response = con.getResponseCode();
-		InputStream in = con.openInputStream();
-		if (response != HttpConnection.HTTP_OK) {
-			RSFMUtils.debug(con.getResponseMessage()
-					+ " HTTP response code: " + response);
-			int len = (int) con.getLength();
-			RSFMUtils.printRESTResponse(in, len);
-			throw new IOException();
-		}
-		return in;
-	}
-
-	/**
 	 * Builds the URL with the given parameters. The format of the URL will be
 	 * http://ws.audioscrobbler.com/2.0/?method=...&ampapi_key=...&ampparam1=value1...
 	 * 
@@ -150,28 +136,6 @@ public final class ConnectionManager {
 			return RSFMUtils.buildURL(sb.toString(), params);
 		} else {
 			return sb.toString();
-		}
-	}
-	
-	/*
-	 * Static member determines if the connection is over wifi
-	 */
-	
-	private static boolean useWifi = true;
-	
-	public static void setUseWifi(boolean useWifi) {
-		ConnectionManager.useWifi = useWifi;
-	}
-	
-	public static boolean getUseWifi() {
-		return ConnectionManager.useWifi;
-	}
-	
-	public static String addRimUrlConnectionParam(String connectionUrl) {
-		if(WLANInfo.getWLANState() == WLANInfo.WLAN_STATE_CONNECTED && useWifi){ 
-			return connectionUrl+=";interface=wifi";
-		} else {
-			return connectionUrl;
 		}
 	}
 }

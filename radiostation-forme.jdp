@@ -67,6 +67,7 @@ src\fm\radiostation\ui\RSFMBaseScreen.java
 src\fm\radiostation\ui\RSFMMainFrame.java
 src\fm\radiostation\ui\RSFMMenuItem.java
 src\fm\radiostation\ui\RSFMResource.java
+src\fm\radiostation\UrlFactory.java
 src\fm\radiostation\VerboseResponse.java
 src\fm\radiostation\Version.java
 src\fm\radiostation\version.properties
