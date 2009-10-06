@@ -11,16 +11,19 @@ RadioStation.ForMe (rs.fm) is tested mostly on BlackBerry Bold. Though it should
 
 Currently rs.fm provides only single layout orientation. For models with narrower/slimmer screens, rs.fm may not fit as beautifully as you would expect. rs.fm is best displayed in landscape orientation (wide screens).
 
-There are two known firmware bugs with earlier BlackBerry devices (BlackBerry 8xxx)
- * Occasionally, connection to Last.fm server may disconnect and become unresponsive. rs.fm has a Timeout Watcher that kills dead connections and skips to the next track. It does so by first receiving certain notifications from the player, and then determines if the connection is dead after a limited period of time. But in BlackBerry 8xxx, `javax.microedition.media.Player` does not fire `bufferingStart` event as expected. Therefore, this mechanism does not work in those devices. Whenever there is a connection error, a user must manually skip the current track.
- * Sound quality in BlackBerry 9000 is better than 8xxx. This may be caused by either a hardware improvement or firmware upgrade.
-
+There are known firmware bugs with earlier BlackBerry devices
+ * Occasionally, connection to Last.fm server may disconnect and become unresponsive. rs.fm has a Timeout Watcher that kills dead connections and skips to the next track. It does so by first receiving certain notifications from the player, and then determines if the connection is dead after a limited period of time. But in BlackBerry v4.6 and lower devices, `javax.microedition.media.Player` does not fire `bufferingStart` event as expected. Therefore, this mechanism does not work in those devices. Whenever there is a connection error, a user must manually skip the current track
 
 = Detailed List =
 
-A detailed list is to be updated.
+RadioStation.ForMe has been tested on following devices and platforms.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Blackberry v4.7:
+BlackBerry Bold 9000 (Bold)
+BlackBerry Curve 8900 (Javellin)
+
+BlackBerry v4.6:
+None
+
+BlackBerry v4.5:
+None
