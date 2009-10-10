@@ -6,5 +6,6 @@ rs.fm uses Fast MD5 Implementaion, it is originally written by Santeri Paavolain
 and later optimized by Timothy W. Macinta. It is licensed under LGPL 2.1.
 
 rs.fm also uses URLEncoder developed by Bert Bos, and is released under W3C Software License.
+rs.fm uses HttpConnectionFactory developed by Marcus Watkins
 
 Some of the icons found in rs.fm is a part of the silk icon set designed by Mark James. 

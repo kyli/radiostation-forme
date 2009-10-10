@@ -22,9 +22,10 @@ package fm.radiostation.player;
 import fm.radiostation.Track;
 
 /**
- * RadioPlayerEvent defines a set of events interested by the UI layer or the
- * RSFMSession. It constitutes a refined version of the event fired by the
- * Player. Additionally, also adds events that more relevent to the use of
+ * RadioPlayerEvent defines a set of higher level events fired by the RSFM
+ * implementation of the Radio Player
+ * <p>
+ * Additionally, also adds events that more relevant to the use of
  * RadioStation.ForMe. Such as the notification of empty playlists.
  * 
  * @author kaiyi

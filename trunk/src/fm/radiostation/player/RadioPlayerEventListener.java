@@ -21,10 +21,9 @@ package fm.radiostation.player;
 
 /**
  * The listener for RadioPlayer events. RadioPlayer event defines several event
- * types, which contains a subset of the events fired by the Player, involving
- * playback changes. An instance implementing this class will be notified when
- * RadioPlayerEvent occurs. Appropriate actions can then be taken depending on
- * the event type and the enclosing track.
+ * types, which involves playback changes. An instance implementing this class
+ * will be notified when RadioPlayerEvent occurs. Appropriate actions can then
+ * be taken depending on the event type and the enclosing track.
  * 
  * @author kaiyi
  * 

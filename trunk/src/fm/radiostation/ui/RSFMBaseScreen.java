@@ -274,7 +274,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 					timeElapsed.setText("0");
 					int dur = (int) (rsfmSession.getRadioPlayer().getDuration() / 1000000);
 					PlaybackTimer playbackTimer = new PlaybackTimer();
-					playbackTimer.start();
+					playbackTimer.run();
 					trackName.setText(tk.getTitle());
 					artistName.setText(tk.getCreator());
 					duration.setText(RSFMUtils.timeFromSeconds(dur));
@@ -341,13 +341,15 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Timer that schedules tasks that updates the current media time.
+	 * <p>
+	 * This class makes use of observer pattern, and listens to more higher
+	 * level event, RadioPlayerEvent. After it initializes, it updates playback
+	 * time until radio stops.
 	 */
-	private class PlaybackTimer extends Thread implements
-			RadioPlayerEventListener {
-		
+	private class PlaybackTimer implements RadioPlayerEventListener {
 		private Timer timer;
 		
 		PlaybackTimer() {
@@ -355,16 +357,21 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		}
 
 		public void run() {
+			rsfmSession.getRadioPlayer().addRadioPlayerEventListener(PlaybackTimer.this);
 			timer.scheduleAtFixedRate(new DurationCounter(), 0, 1000);
 		}
 
 		public void radioPlayerEventOccurred(RadioPlayerEvent event) {
 			if (event.getEvent() == RadioPlayerEvent.RADIO_OFF
 					|| event.getEvent() == RadioPlayerEvent.TRACK_STOPPED) {
+				rsfmSession.getRadioPlayer().removeRadioPlayerEventListener(PlaybackTimer.this);
 				timer.cancel();
 			} 
 		}
 		
+		/**
+		 * Timer task to be executed at each second.
+		 */
 		private class DurationCounter extends TimerTask {
 			public void run() {
 				UiApplication.getUiApplication().invokeLater(new Runnable() {

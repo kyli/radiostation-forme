@@ -61,7 +61,7 @@ public class RadioPlayer implements PlayerListener {
 		if (!playlist.getTracklist().isEmpty()) {
 			Track tk = (Track) playlist.getTracklist().elementAt(0);
 			RSFMUtils.debug("Current track: " + tk.getTitle() + " by: "
-					+ tk.getCreator() + " duration: " + tk.getDuration());
+					+ tk.getCreator() + " duration: " + RSFMUtils.timeFromSeconds(tk.getDuration() / 1000));
 			AudioDataSource ads = new AudioDataSource(tk.getLocation());
 			try {
 				player = Manager.createPlayer(ads);
@@ -190,9 +190,9 @@ public class RadioPlayer implements PlayerListener {
 						"Try to remove track from empty playlist after song ends");
 			}
 		} else if (PlayerListener.BUFFERING_STARTED.equals(event)) {
-			RSFMUtils.debug("Buffering started, timeout watcher starting.");
+			RSFMUtils.debug("Buffering started, timeout watcher starting. Thread count="+Thread.activeCount());
 			TimeoutWatcher tw = new TimeoutWatcher();
-			tw.start();
+			tw.run();
 		} else if (PlayerListener.DEVICE_UNAVAILABLE.equals(event)) {
 			try {
 				shutdown();
@@ -212,8 +212,8 @@ public class RadioPlayer implements PlayerListener {
 
 	private void playerStopped(Player player, Vector tracklist) {
 		RadioPlayerEvent evt;
-		RSFMUtils.debug("Media Stopped at: " + player.getMediaTime()
-				+ " Duration is: " + player.getDuration());
+		RSFMUtils.debug("Media Stopped at: " + RSFMUtils.timeFromSeconds((int)(player.getMediaTime() / 1000000))
+				+ " Duration is: " + RSFMUtils.timeFromSeconds((int)(player.getDuration() / 1000000)));
 		Track tk = (Track) tracklist.elementAt(0);
 		if (tk.getDuration() > 30
 				&& (player.getMediaTime() >= (0.5 * player.getDuration()) || player
@@ -239,15 +239,10 @@ public class RadioPlayer implements PlayerListener {
 	}
 
 	private void fireRadioPlayerEvent(final RadioPlayerEvent event) {
-		Thread th = new Thread() {
-			public void run() {
-				for (int i = radioPlayerEventListeners.size() - 1; i >= 0; i--) {
-					((RadioPlayerEventListener) radioPlayerEventListeners.elementAt(i))
-					.radioPlayerEventOccurred(event);
-				}
-			}
-		};
-		th.start();
+		for (int i = radioPlayerEventListeners.size() - 1; i >= 0; i--) {
+			((RadioPlayerEventListener) radioPlayerEventListeners.elementAt(i))
+			.radioPlayerEventOccurred(event);
+		}
 	}
 
 	public long getDuration() {
@@ -273,44 +268,38 @@ public class RadioPlayer implements PlayerListener {
 	 * @author kaiyi
 	 * 
 	 */
-	private class TimeoutWatcher extends Thread implements PlayerListener{
+	private class TimeoutWatcher implements PlayerListener{
+		private static final int TIMEOUT_LIMIT = 30;
 		private Timer timer;
 
 		public void run() {
 			timer = new Timer();
 			player.addPlayerListener(this);
-			timer.schedule(new TimeoutCounter(), 0, 1000);
+			timer.schedule(new TimeoutCounter(), TIMEOUT_LIMIT * 1000);
 		}
 		
-		private class TimeoutCounter extends TimerTask {
-			private static final int TIMEOUT_LIMIT = 30;
-			
-			int sec = 0;
-			public void run() {
-				if (sec < TIMEOUT_LIMIT) {
-					sec++;
-				} else {
-					try {
-						stop();
-					} catch (MediaException e) {
-						e.printStackTrace();
-						player.removePlayerListener(TimeoutWatcher.this);
-						timer.cancel();
-						RSFMUtils.debug("Timer cancelled");
-					}
-				}
-			}
-		}
-
 		public void playerUpdate(Player player, String event, Object eventData) {
 			if (PlayerListener.STOPPED.equals(event)
 					|| PlayerListener.BUFFERING_STOPPED.equals(event)
 					|| PlayerListener.END_OF_MEDIA.equals(event)
 					|| PlayerListener.CLOSED.equals(event)
-					|| PlayerListener.DEVICE_UNAVAILABLE.equals(event)
-					) {
+					|| PlayerListener.DEVICE_UNAVAILABLE.equals(event)) {
 				player.removePlayerListener(this);
 				timer.cancel();
+			}
+		}
+		
+		private class TimeoutCounter extends TimerTask {
+			
+			public void run() {
+				try {
+					stop();
+				} catch (MediaException e) {
+					e.printStackTrace();
+					player.removePlayerListener(TimeoutWatcher.this);
+					timer.cancel();
+					RSFMUtils.debug("Timer cancelled");
+				}
 			}
 		}
 	}
