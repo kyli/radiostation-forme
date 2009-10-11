@@ -63,10 +63,11 @@ public class RSFMSession implements RadioPlayerEventListener {
 	 * key to access persistent store. these keys are private keys and are
 	 * not provided as a part of the source code release
 	 */
-	private static String api_key;
-	private static String secret;
-	private static String settingsKey;
-	private static String queueSubmittingTracksKey;
+	private static final String api_key;
+	private static final String secret;
+	private static final String settingsKey;
+	private static final String sessionsKey;
+	private static final String queueSubmittingTracksKey;
 	private Vector queuedSubmittingTracks;
 	
 	/*
@@ -79,6 +80,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 			api_key = (String) ht.get("apiKey");
 			secret = (String) ht.get("secret");
 			settingsKey = (String) ht.get("settingKey");
+			sessionsKey = (String) ht.get("sessionsKey");
 			queueSubmittingTracksKey = (String) ht.get("queuedTracksKey");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -148,10 +150,41 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 		PersistentObject store = PersistentStore.getPersistentObject(StringUtilities
 				.stringHashToLong(settingsKey));
-		RSFMHashMap userinfo = new RSFMHashMap(2);
+		RSFMHashMap userinfo = new RSFMHashMap(3);
 		userinfo.put("username", username);
 		userinfo.put("password", password);
 		userinfo.put("useWifi", new Boolean(UrlFactory.forceWifi));
+		synchronized(store) {
+			store.setContents(userinfo); 
+			store.commit();
+		}
+	}
+	
+	/**
+	 * loads session data from persistent store
+	 */
+	public void loadSession() {
+		PersistentObject store = PersistentStore.getPersistentObject(StringUtilities
+				.stringHashToLong(sessionsKey));
+		synchronized (store) {
+			RSFMHashMap currentinfo = (RSFMHashMap) store.getContents();
+			if (currentinfo != null) {
+				String station = (String) currentinfo.get("station");
+				if (station != null) {
+					Radio.DEFAULT_STATION = station;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * saves session data to persistent store
+	 */
+	public void saveSession() {
+		PersistentObject store = PersistentStore.getPersistentObject(StringUtilities
+				.stringHashToLong(sessionsKey));
+		RSFMHashMap userinfo = new RSFMHashMap(1);
+		userinfo.put("station", Radio.DEFAULT_STATION);
 		synchronized(store) {
 			store.setContents(userinfo); 
 			store.commit();
@@ -196,6 +229,8 @@ public class RSFMSession implements RadioPlayerEventListener {
 				.stringHashToLong(settingsKey));
 		PersistentStore.destroyPersistentObject(StringUtilities
 				.stringHashToLong(queueSubmittingTracksKey));
+		PersistentStore.destroyPersistentObject(StringUtilities
+				.stringHashToLong(sessionsKey));
 	}
 	
 	/**
@@ -399,6 +434,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 			radio = (Radio) connMan.getXMLResponse(api_key,
 					Radio.METHOD_RADIO_TUNE, params, handler,
 					HttpConnection.POST);
+			Radio.DEFAULT_STATION = station;
 			if (radio != null && radio.isSuccess()) {
 				fireStatusEvent(new StatusEvent(StatusEvent.TUNED_TO + " "
 						+ radio.getName()));

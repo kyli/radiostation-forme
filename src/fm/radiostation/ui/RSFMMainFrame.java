@@ -43,6 +43,7 @@ public final class RSFMMainFrame extends UiApplication {
 		rsfmSession = new RSFMSession();
 		mainScreen = new RSFMBaseScreen(rsfmSession);
 		rsfmSession.loadSettings();
+		rsfmSession.loadSession();
 		rsfmSession.loadQueuedTracks();
 		pushScreen(mainScreen);
 
