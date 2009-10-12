@@ -44,7 +44,6 @@ public final class RSFMMainFrame extends UiApplication {
 		mainScreen = new RSFMBaseScreen(rsfmSession);
 		rsfmSession.loadSettings();
 		rsfmSession.loadSession();
-		rsfmSession.loadQueuedTracks();
 		pushScreen(mainScreen);
 
 		// Immediately after GUI is rendered, create mobileSession in a separate

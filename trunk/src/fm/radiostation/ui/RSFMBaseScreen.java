@@ -249,9 +249,9 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 	}
 
 	public void close() {
+		rsfmSession.shutdownRadio();
 		rsfmSession.getRadioPlayer().removeRadioPlayerEventListener(this);
 		rsfmSession.removeStatusEventListener(this);
-		rsfmSession.saveQueuedTracks();
 		rsfmSession.saveSession();
 		super.close();
 	}
