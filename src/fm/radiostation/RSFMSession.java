@@ -67,7 +67,6 @@ public class RSFMSession implements RadioPlayerEventListener {
 	private static final String secret;
 	private static final String settingsKey;
 	private static final String sessionsKey;
-	private static final String queueSubmittingTracksKey;
 	private Vector queuedSubmittingTracks;
 	
 	/*
@@ -81,7 +80,6 @@ public class RSFMSession implements RadioPlayerEventListener {
 			secret = (String) ht.get("secret");
 			settingsKey = (String) ht.get("settingKey");
 			sessionsKey = (String) ht.get("sessionsKey");
-			queueSubmittingTracksKey = (String) ht.get("queuedTracksKey");
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error: Unable to load rsfm.keys.");
@@ -173,6 +171,10 @@ public class RSFMSession implements RadioPlayerEventListener {
 				if (station != null) {
 					Radio.DEFAULT_STATION = station;
 				}
+				queuedSubmittingTracks = (Vector) currentinfo.get("queuedtracks");
+				if (queuedSubmittingTracks == null) {
+					queuedSubmittingTracks = new Vector();
+				}
 			}
 		}
 	}
@@ -183,38 +185,11 @@ public class RSFMSession implements RadioPlayerEventListener {
 	public void saveSession() {
 		PersistentObject store = PersistentStore.getPersistentObject(StringUtilities
 				.stringHashToLong(sessionsKey));
-		RSFMHashMap userinfo = new RSFMHashMap(1);
+		RSFMHashMap userinfo = new RSFMHashMap(2);
 		userinfo.put("station", Radio.DEFAULT_STATION);
+		userinfo.put("queuedtracks", queuedSubmittingTracks);
 		synchronized(store) {
 			store.setContents(userinfo); 
-			store.commit();
-		}
-	}
-	
-	/**
-	 * Retrieves the list of unsubmitted tracks from persistent layer.
-	 */
-	public void loadQueuedTracks() {
-		PersistentObject store = PersistentStore.getPersistentObject(StringUtilities
-				.stringHashToLong(queueSubmittingTracksKey));
-		synchronized (store) {
-			Vector queuedTracks = (Vector) store.getContents();
-			if (queuedTracks == null) {
-				queuedSubmittingTracks = new Vector();
-			} else {
-				queuedSubmittingTracks = queuedTracks;
-			}
-		}
-	}
-	
-	/**
-	 * Saves all unsubmitted tracks to persistent layer.
-	 */
-	public void saveQueuedTracks() {
-		PersistentObject store = PersistentStore.getPersistentObject(StringUtilities
-				.stringHashToLong(queueSubmittingTracksKey));
-		synchronized(store) {
-			store.setContents(queuedSubmittingTracks); 
 			store.commit();
 		}
 	}
@@ -228,9 +203,8 @@ public class RSFMSession implements RadioPlayerEventListener {
 		PersistentStore.destroyPersistentObject(StringUtilities
 				.stringHashToLong(settingsKey));
 		PersistentStore.destroyPersistentObject(StringUtilities
-				.stringHashToLong(queueSubmittingTracksKey));
-		PersistentStore.destroyPersistentObject(StringUtilities
 				.stringHashToLong(sessionsKey));
+		fireStatusEvent(new StatusEvent(StatusEvent.USER_INFO_CLEARED));
 	}
 	
 	/**

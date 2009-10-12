@@ -38,6 +38,7 @@ public class StatusEvent {
 	public static final String INCORRECT_SYS_TIME = "System Clock Needs to be Corrected";
 	public static final String CLT_ID_BANNED = "Client Banned, Please Get the Latest Software Updates";
 	public static final String SUBSCRIBER_ONLY = "Subscriber only. Access denied.";
+	public static final String USER_INFO_CLEARED = "User Data Cleared";
 	
 	private String status;
 	
