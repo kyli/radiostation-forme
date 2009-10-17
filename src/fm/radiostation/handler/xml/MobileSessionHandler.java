@@ -23,6 +23,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import fm.radiostation.MobileSession;
+import fm.radiostation.RSFMUtils;
 
 public class MobileSessionHandler extends RESTResponseHandler{
 	
@@ -35,7 +36,7 @@ public class MobileSessionHandler extends RESTResponseHandler{
 			Attributes attributes) throws SAXException {
 		if (SESSION.equals(name)) {
 			apiResponseObject = new MobileSession();
-		}
+		} 
 	}
 	
 	public void endElement(String uri, String localName, String name)
@@ -53,6 +54,9 @@ public class MobileSessionHandler extends RESTResponseHandler{
 			session.setSk(attr);
 		} else if (SUBSCRIBER.equals(name)) {
 			session.setSubscriber("1".equals(attr));
+		} else {
+			RSFMUtils.debug("Unprocessed mobile session element name="+name+" attr="+attr, this);
 		}
+		setAttribute("");
 	}
 }

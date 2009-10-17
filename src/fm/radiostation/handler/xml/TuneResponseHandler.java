@@ -23,6 +23,7 @@ package fm.radiostation.handler.xml;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
+import fm.radiostation.RSFMUtils;
 import fm.radiostation.Radio;
 
 public class TuneResponseHandler extends RESTResponseHandler {
@@ -37,7 +38,7 @@ public class TuneResponseHandler extends RESTResponseHandler {
 			Attributes attributes) throws SAXException {
 		if (STATION.equals(name)) {
 			apiResponseObject = new Radio();
-		}
+		} 
 	}
 	
 	public void endElement(String uri, String localName, String name)
@@ -54,6 +55,9 @@ public class TuneResponseHandler extends RESTResponseHandler {
 			tune.setUrl(attr);
 		} else if (SUPPORT_DISCOVERY.equals(name)) {
 			tune.setSupportdiscovery("1".equals(attr));
+		} else {
+			RSFMUtils.debug("Unprocessed tune response element name="+name+" attr="+attr, this);
 		}
+		setAttribute("");
 	}
 }

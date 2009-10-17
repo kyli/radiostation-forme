@@ -65,19 +65,19 @@ import fm.radiostation.ui.action.TuneStationAction;
  * 
  */
 public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
-		RadioPlayerEventListener {
+RadioPlayerEventListener {
 
 	private static final int MAX_IMAGE_SIZE = 175;
 
 	private final ResourceBundle bsrb;
-	
+
 	private BitmapField albumCover;
 	private TextField artistName;
 	private TextField albumName;
 	private TextField trackName;
-	
+
 	private LabelField status;
-	
+
 	private RSFMMenuItem audioPlaybackControl;
 	private RSFMMenuItem skipTrackControl;
 	private RSFMMenuItem tuneStationControl;
@@ -99,7 +99,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		this.rsfmSession = rsfmSession;
 		rsfmSession.addStatusEventListener(this);
 		rsfmSession.getRadioPlayer().addRadioPlayerEventListener(this);
-		
+
 		// initialize rsfm actions
 		PlayOrStopAction playOrStopAction = new PlayOrStopAction(rsfmSession);
 		SkipTrackAction skipTrackAction = new SkipTrackAction(rsfmSession);
@@ -109,7 +109,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		LoveOrBanTrackAction loveTrackAction = new LoveOrBanTrackAction(rsfmSession, true);
 		LoveOrBanTrackAction banTrackAction = new LoveOrBanTrackAction(rsfmSession, false);
 		BuyTrackAction buyTrackAction = new BuyTrackAction(rsfmSession);
-		
+
 		// retrieve resource bundle and set frame title
 		bsrb = RSFMResource.getUiResources();
 		LabelField title = new LabelField(bsrb.getString(0), LabelField.FIELD_LEFT
@@ -124,7 +124,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 
 		HorizontalFieldManager trackDetailContainer = new HorizontalFieldManager();
 		defaultAlbumArt = Bitmap
-				.getBitmapResource("default_album_cover.png");
+		.getBitmapResource("default_album_cover.png");
 		albumCover = new BitmapField(defaultAlbumArt);
 		MarginalManager albumContainer = new MarginalManager(Manager.NO_HORIZONTAL_SCROLL
 				| Manager.NO_VERTICAL_SCROLL, 5);
@@ -135,15 +135,15 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 				VerticalFieldManager.NO_SCROLL_RESET);
 		Font detailsFont = Font.getDefault().derive(Font.PLAIN, 12);
 		Font labelFont = detailsFont.derive(Font.PLAIN, 17);
-		
+
 		right1.add(new BitmapField(Bitmap.getBitmapResource("lastfm.png")));
-		
+
 		trackName = new DetailField();
 		trackName.setFont(labelFont);
 		trackName.setText(bsrb.getString(13));
 		trackName.setEditable(false);
 		right1.add(trackName);
-		
+
 		albumName = new DetailField();
 		albumName.setFont(detailsFont);
 		albumName.setText(bsrb.getString(12));
@@ -152,7 +152,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		albumNameLabel.setFont(labelFont);
 		right1.add(albumNameLabel);
 		right1.add(albumName);
-		
+
 		artistName = new DetailField();
 		artistName.setFont(detailsFont);
 		artistName.setText(bsrb.getString(0));
@@ -161,7 +161,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		artistNameLabel.setFont(labelFont);
 		right1.add(artistNameLabel);
 		right1.add(artistName);
-		
+
 		status = new LabelField("");
 		status.setFont(labelFont);
 		right1.add(status);
@@ -170,7 +170,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		mm2.add(right1);
 		trackDetailContainer.add(mm2);
 		bbm.add(trackDetailContainer);
-		
+
 		VerticalFieldManager lower = new VerticalFieldManager(
 				VerticalFieldManager.NO_SCROLL_RESET);
 		timeElapsed = new LabelField();
@@ -208,23 +208,23 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		tuneStationControl = new RSFMMenuItem(bsrb, 3, 3, 3, tuneStationAction);
 		settingControl = new RSFMMenuItem(bsrb, 8, 4, 4, settingConfigAction);
 		aboutControl = new RSFMMenuItem(bsrb, 7, 5, 5, aboutAction);
-		
+
 		mm.add(bbm);
 		add(mm);
 		setFocus();
 	}
-	
+
 	private class DetailField extends TextField {
 		public DetailField() {
 			super(NON_FOCUSABLE);
 		}
-		
+
 		protected synchronized void paint(Graphics graphics) {
 			graphics.setColor(Color.MAROON);
 			super.paint(graphics);
 		}
 	}
-	
+
 	private class IconButton extends BitmapField {
 		private AbstractRSFMAction action;
 
@@ -232,13 +232,13 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 			super(standby, BitmapField.FOCUSABLE);
 			this.action = action;
 		}
-		
+
 		protected boolean navigationClick(int status, int time) {
 			action.run();
 			return true;
 		}
 	}
-	
+
 	protected void makeMenu(Menu menu, int instance) {
 		menu.add(audioPlaybackControl);
 		menu.add(skipTrackControl);
@@ -266,6 +266,8 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 
 	/**
 	 * Handles events fired by RadioPlayer, and update the ui where appropriate.
+	 * Interested events include {@link RadioPlayerEvent#TRACK_STARTED}, and
+	 * {@link RadioPlayerEvent#RADIO_OFF}
 	 */
 	public void radioPlayerEventOccurred(final RadioPlayerEvent event) {
 		if (event.getEvent() == RadioPlayerEvent.TRACK_STARTED) {
@@ -274,8 +276,6 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 					Track tk = event.getTrack();
 					timeElapsed.setText("0");
 					int dur = (int) (rsfmSession.getRadioPlayer().getDuration() / 1000000);
-					PlaybackTimer playbackTimer = new PlaybackTimer();
-					playbackTimer.run();
 					trackName.setText(tk.getTitle());
 					artistName.setText(tk.getCreator());
 					duration.setText(RSFMUtils.timeFromSeconds(dur));
@@ -284,40 +284,28 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 					playOrStop.setBitmap(stopIcon);
 				}
 			});
-			Thread th = new Thread() {
-				public void run() {
-					String url = event.getTrack().getImage();
-					if (url != null) {
-						EncodedImage img = rsfmSession.fetchAlbumArt(url);
-						if (img != null) {
-							int width = img.getWidth();
-							int height = img.getHeight();
-							if (height > MAX_IMAGE_SIZE
-									|| width > MAX_IMAGE_SIZE) {
-								int numerator = Fixed32.toFP(Math.max(width, height));
-								int denominator = Fixed32.toFP(MAX_IMAGE_SIZE);
-								int scale = Fixed32.div(numerator, denominator);
-								img = img.scaleImage32(scale, scale);
-							}
-							updateAlbumImage(img.getBitmap());
-						} else {
-							updateAlbumImage(defaultAlbumArt);
-						}
-					} else {
-						updateAlbumImage(defaultAlbumArt);
+			PlaybackTimer playbackTimer = new PlaybackTimer();
+			playbackTimer.run();
+			String url = event.getTrack().getImage();
+			if (url != null) {
+				EncodedImage img = rsfmSession.fetchAlbumArt(url);
+				if (img != null) {
+					int width = img.getWidth();
+					int height = img.getHeight();
+					if (height > MAX_IMAGE_SIZE
+							|| width > MAX_IMAGE_SIZE) {
+						int numerator = Fixed32.toFP(Math.max(width, height));
+						int denominator = Fixed32.toFP(MAX_IMAGE_SIZE);
+						int scale = Fixed32.div(numerator, denominator);
+						img = img.scaleImage32(scale, scale);
 					}
+					updateAlbumImage(img.getBitmap());
+				} else {
+					updateAlbumImage(defaultAlbumArt);
 				}
-
-				private void updateAlbumImage(final Bitmap albumArt) {
-					UiApplication.getUiApplication().invokeLater(
-							new Runnable() {
-								public void run() {
-									albumCover.setBitmap(albumArt);
-								}
-							});
-				}
-			};
-			th.start();
+			} else {
+				updateAlbumImage(defaultAlbumArt);
+			}
 		} else if (event.getEvent() == RadioPlayerEvent.RADIO_OFF) {
 			UiApplication.getUiApplication().invokeLater(new Runnable() {
 				public void run() {
@@ -328,6 +316,15 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 		}  
 	}
 	
+	private void updateAlbumImage(final Bitmap albumArt) {
+		UiApplication.getUiApplication().invokeLater(
+				new Runnable() {
+					public void run() {
+						albumCover.setBitmap(albumArt);
+					}
+				});
+	}
+
 	protected boolean keyControl(char c, int status, int time) {
 		if (c == Characters.CONTROL_VOLUME_UP) {
 			if (rsfmSession.getRadioPlayer() == null) {
@@ -352,7 +349,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 	 */
 	private class PlaybackTimer implements RadioPlayerEventListener {
 		private Timer timer;
-		
+
 		PlaybackTimer() {
 			timer = new Timer();
 		}
@@ -369,7 +366,7 @@ public class RSFMBaseScreen extends MainScreen implements StatusEventListener,
 				timer.cancel();
 			} 
 		}
-		
+
 		/**
 		 * Timer task to be executed at each second.
 		 */

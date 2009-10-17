@@ -335,8 +335,11 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 	}
 	
+	/**
+	 * submits listened track information to last.fm
+	 */
 	public boolean submission(Track tk) {
-		queueSubmissionData(tk);
+		queuedSubmittingTracks.addElement(tk);
 		if (handshake != null) {
 			Hashtable params = new Hashtable(10);
 			params.put("s", handshake.getSessionID());
@@ -359,7 +362,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 			VerboseResponse submissionResponse = (VerboseResponse) connMan.getResponse(url,
 					handler, HttpConnection.POST);
 			if (submissionResponse != null && submissionResponse.isSuccess()) {
-				dequeueSubmissionData();
+				queuedSubmittingTracks.removeAllElements();
 				return true;
 			} else {
 				handleFailure(submissionResponse);
@@ -370,15 +373,10 @@ public class RSFMSession implements RadioPlayerEventListener {
 			return false;
 		}
 	}
-
-	private void queueSubmissionData(Track tk) {
-		queuedSubmittingTracks.addElement(tk);
-	}
 	
-	private void dequeueSubmissionData() {
-		queuedSubmittingTracks.removeAllElements();
-	}
-	
+	/**
+	 * tune to specified station
+	 */
 	public boolean tune(String station) {
 		if (!mobileSession.isSubscriber()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.SUBSCRIBER_ONLY));
@@ -426,6 +424,9 @@ public class RSFMSession implements RadioPlayerEventListener {
 		return false;
 	}
 
+	/**
+	 * fetch playlist from last.fm
+	 */
 	public boolean fetchPlayList() {
 		if (!mobileSession.isSubscriber()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.SUBSCRIBER_ONLY));
@@ -461,18 +462,9 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 	}
 	
-	public Playlist getPlaylist() {
-		return playlist;
-	}
-
-	public Radio getRadio() {
-		return radio;
-	}
-	
-	public RadioPlayer getRadioPlayer() {
-		return radioPlayer;
-	}
-	
+	/**
+	 * play radio as soon as possible
+	 */
 	public void playRadio() {
 		if (!mobileSession.isSubscriber()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.SUBSCRIBER_ONLY));
@@ -486,7 +478,16 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 	}
 	
+	/**
+	 * tells radio player to stop current track
+	 * 
+	 * @see RadioPlayer#stop()
+	 */
 	public void stopCurrentTrack() {
+		if (!radioPlayer.isPlaying())
+		{
+			return;
+		}
 		if (radioPlayer != null) {
 			try {
 				radioPlayer.stop();
@@ -502,7 +503,16 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 	}
 	
+	/**
+	 * tells RadioPlayer to shutdown
+	 * 
+	 * @see RadioPlayer#shutdown()
+	 */
 	public void shutdownRadio() {
+		if (!radioPlayer.isPlaying())
+		{
+			return;
+		}
 		if (radioPlayer != null) {
 			try {
 				radioPlayer.shutdown();
@@ -527,6 +537,43 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 	}
 
+	/**
+	 * submits request to indicate love or ban a track
+	 */
+	public boolean loveOrBanTrack(Track track, String method) {
+		String title = track.getTitle();
+		String creator = track.getCreator();
+		String sk = mobileSession.getSk();
+		
+		Vector paramList = new Vector();
+		paramList.addElement("api_key" + api_key);
+		paramList.addElement("artist" + creator);
+		paramList.addElement("method" + method);
+		paramList.addElement("sk" + sk);
+		paramList.addElement("track" + title);
+		
+		Hashtable params = new Hashtable(4);
+		params.put("track", title);
+		params.put("artist", creator);
+		params.put("api_sig", RSFMUtils.createApiSignature(paramList, secret));
+		params.put("sk", sk);
+		
+		SimpleResponseHandler handler = new SimpleResponseHandler();
+		ResponseObject response = connMan.getXMLResponse(api_key, method, params, handler, HttpConnection.POST);
+		if (response != null && response.isSuccess()) {
+			fireStatusEvent(new StatusEvent(StatusEvent.USER_PROFILE_UPDATED));
+			return true;
+		} else {
+			fireStatusEvent(new StatusEvent(StatusEvent.CONNECTION_ERROR));
+			return false;
+		}
+	}
+	
+	/**
+	 * handles events fired by the rsfm radio player, including
+	 * {@link RadioPlayerEvent#OUT_OF_TRACKS}, {@link RadioPlayerEvent#TRACK_STARTED}
+	 * and {@link RadioPlayerEvent#TRACK_STOPPED}
+	 */
 	public void radioPlayerEventOccurred(final RadioPlayerEvent event) {
 		if (event.getEvent() == RadioPlayerEvent.OUT_OF_TRACKS) {
 			fetchPlayList();
@@ -558,6 +605,9 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 	} 
 
+	/*
+	 * status event facilities
+	 */
 	private Vector statusEventListeners = new Vector();
 
 	public void addStatusEventListener(StatusEventListener sel) {
@@ -575,41 +625,28 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 	}
 	
+	/*
+	 * uninteresting getters
+	 */
+	
+	public Playlist getPlaylist() {
+		return playlist;
+	}
+
+	public Radio getRadio() {
+		return radio;
+	}
+	
+	public RadioPlayer getRadioPlayer() {
+		return radioPlayer;
+	}
+	
 	public String getUsername() {
 		return username;
 	}
 	
 	public String getPassword() {
 		return password;
-	}
-	
-	public boolean loveOrBanTrack(Track track, String method) {
-		String title = track.getTitle();
-		String creator = track.getCreator();
-		String sk = mobileSession.getSk();
-		
-		Vector paramList = new Vector();
-		paramList.addElement("api_key" + api_key);
-		paramList.addElement("artist" + creator);
-		paramList.addElement("method" + method);
-		paramList.addElement("sk" + sk);
-		paramList.addElement("track" + title);
-		
-		Hashtable params = new Hashtable(4);
-		params.put("track", title);
-		params.put("artist", creator);
-		params.put("api_sig", RSFMUtils.createApiSignature(paramList, secret));
-		params.put("sk", sk);
-		
-		SimpleResponseHandler handler = new SimpleResponseHandler();
-		ResponseObject response = connMan.getXMLResponse(api_key, method, params, handler, HttpConnection.POST);
-		if (response != null && response.isSuccess()) {
-			fireStatusEvent(new StatusEvent(StatusEvent.USER_PROFILE_UPDATED));
-			return true;
-		} else {
-			fireStatusEvent(new StatusEvent(StatusEvent.CONNECTION_ERROR));
-			return false;
-		}
 	}
 
 	/**
