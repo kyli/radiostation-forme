@@ -25,6 +25,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 import fm.radiostation.Playlist;
+import fm.radiostation.RSFMUtils;
 import fm.radiostation.Track;
 
 public class PlaylistHandler extends RESTResponseHandler {
@@ -79,6 +80,8 @@ public class PlaylistHandler extends RESTResponseHandler {
 			} else if (TRACK.equals(name)) {
 				tracklist.addElement(track);
 				track = null;
+			} else {
+				RSFMUtils.debug("Unprocessed track element name="+name+" attr="+attr, this);
 			}
 		} else if (TRACKLIST.equals(name)) {
 			playlist.setTracklist(tracklist);
@@ -89,7 +92,10 @@ public class PlaylistHandler extends RESTResponseHandler {
 			playlist.setTitle(attr);
 		} else if (CREATOR.equals(name)) {
 			playlist.setCreator(attr);
+		} else {
+			RSFMUtils.debug("Unprocessed track list element name="+name+" attr="+attr, this);
 		}
+		setAttribute("");
 	}
 	
 }

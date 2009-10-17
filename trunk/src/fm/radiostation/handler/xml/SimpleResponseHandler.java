@@ -43,13 +43,17 @@ public class SimpleResponseHandler extends RESTResponseHandler {
 			}
 		} else if (ERROR.equals(name)) {
 			RSFMUtils.debug("Last.fm API returned error code: "+attributes.getValue(CODE)+" ;Error message: ");
-		}
+		} 
 	}
 	
 	public void endElement(String uri, String localName, String name)
 			throws SAXException {
+		String attr = getAttribute();
 		if (ERROR.equals(name)) {
-			RSFMUtils.debug(getAttribute());
+			RSFMUtils.debug(attr);
+		} else {
+			RSFMUtils.debug("Unprocessed simple response element name="+name+" attr="+attr, this);
 		}
+		setAttribute("");
 	}
 }

@@ -111,7 +111,8 @@ public class RadioPlayer implements PlayerListener {
 	}
 
 	/**
-	 * Shut down radio.
+	 * Shut down radio. This release all of resources, detaches all listeners
+	 * and empties tracklist
 	 */
 	public void shutdown() throws MediaException {
 		if (player == null) {
@@ -228,21 +229,26 @@ public class RadioPlayer implements PlayerListener {
 	/*
 	 * Event firing facilities for RadioPlayer.
 	 */
-	private Vector radioPlayerEventListeners = new Vector();
+	private Vector listeners = new Vector();
 
 	public void addRadioPlayerEventListener(RadioPlayerEventListener rpel) {
-		radioPlayerEventListeners.addElement(rpel);
+		listeners.addElement(rpel);
 	}
 
 	public void removeRadioPlayerEventListener(RadioPlayerEventListener rpel) {
-		radioPlayerEventListeners.removeElement(rpel);
+		listeners.removeElement(rpel);
 	}
 
 	private void fireRadioPlayerEvent(final RadioPlayerEvent event) {
-		for (int i = radioPlayerEventListeners.size() - 1; i >= 0; i--) {
-			((RadioPlayerEventListener) radioPlayerEventListeners.elementAt(i))
-			.radioPlayerEventOccurred(event);
-		}
+		Thread th = new Thread() {
+			public void run() {
+				for (int i = listeners.size() - 1; i >= 0; i--) {
+					RadioPlayerEventListener l = (RadioPlayerEventListener) listeners.elementAt(i);
+					l.radioPlayerEventOccurred(event);
+				}
+			}
+		};
+		th.start();
 	}
 
 	public long getDuration() {

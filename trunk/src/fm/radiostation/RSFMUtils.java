@@ -163,7 +163,19 @@ public final class RSFMUtils {
 	 * logging information that's relevant to RadioStation.ForMe.
 	 */
 	public static void debug(String message) {
-		System.out.println(Thread.currentThread().getName() + ": " + message);
+		System.out.println("rsfm("+Thread.currentThread().getName() + "): " + message);
+	}
+	
+	/**
+	 * Extended logging utility method that output the debug message directly to
+	 * the standard out. Along with the message, the source class name and the
+	 * name of the current thread.
+	 * <p>
+	 * Logging facilities can be added at convenience to provide exclusive
+	 * logging information that's relevant to RadioStation.ForMe.
+	 */
+	public static void debug(String message, Object source) {
+		System.out.println(source.getClass().getName()+"("+Thread.currentThread().getName() + "): " + message);
 	}
 
 	/**

@@ -20,6 +20,13 @@
 
 package fm.radiostation;
 
+/**
+ * Status events are a selection of events that contains information updates
+ * that is relevant to the user.
+ * 
+ * @author kaiyi
+ * 
+ */
 public class StatusEvent {
 	
 	//TODO Need to be factored into messages.rrh because they are visible to the user

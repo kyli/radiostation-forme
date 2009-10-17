@@ -76,7 +76,14 @@ abstract public class RESTResponseHandler extends DefaultHandler implements Resp
 	/**
 	 * Get the current attribute
 	 */
-	protected final String getAttribute() {
+	String getAttribute() {
 		return attribute;
+	}
+	
+	/**
+	 * Set the current attribute
+	 */
+	void setAttribute(String attr) {
+		attribute = attr;
 	}
 }
