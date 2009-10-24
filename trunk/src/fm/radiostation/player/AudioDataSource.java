@@ -66,10 +66,9 @@ import fm.radiostation.Track;
 public class AudioDataSource extends DataSource {
 	
 	private ContentConnection dataConnection;
-	private UrlFactory servicemaster = 
-		new UrlFactory(new int[] {UrlFactory.TRANSPORT_DIRECT_TCP, 
-				UrlFactory.TRANSPORT_WAP2, 
-				UrlFactory.TRANSPORT_WIFI, });
+	private UrlFactory servicemaster = new UrlFactory(new int[] {UrlFactory.TRANSPORT_WIFI,
+			UrlFactory.TRANSPORT_DIRECT_TCP,
+			UrlFactory.TRANSPORT_WAP2, });
 	
 	private InputStream readStream;
 	private AudioSourceStream feedToPlayer;
@@ -128,7 +127,9 @@ public class AudioDataSource extends DataSource {
 				readStream.close();
 				dataConnection.close();
 			}
-			feedToPlayer.close();
+			if (feedToPlayer != null) {
+				feedToPlayer.close();
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage());

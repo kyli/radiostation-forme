@@ -99,7 +99,8 @@ public final class ConnectionManager {
 				disconnect(con, in);
 			} catch (Throwable e) {
 				e.printStackTrace();
-				RSFMUtils.debug("Connection not closed");
+				RSFMUtils.debug("Exception when trying to close " +
+						"connection after communication is complete. "+e.getMessage(), this);
 			}
 		}
 	}
