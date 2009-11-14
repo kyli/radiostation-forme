@@ -50,12 +50,12 @@ import net.rim.device.api.system.WLANInfo;
  * <p>
  * Good luck, I hope this makes networking on BlackBerry easier for you.
  * <p>
- * <strong>Modified by kaiyi li, 4 Oct. 2009.</strong> 
+ * <tt>Modified by kaiyi li, 4 Oct. 2009.</tt> 
  * <p>
  * In stead of generating the http connection that is appropriate for the connection availability, the connection url 
  * is generated with {@link UrlFactory#appendRimConnectionParam(String, String)}.
  * <p>
- * The Type name is changed from <code>HttpConnectionFactory</code> to <code>UrlFactory</code>
+ * The Type name is changed from <tt>HttpConnectionFactory</tt> to <tt>UrlFactory</tt>
  */
 public class UrlFactory {
 
@@ -258,8 +258,14 @@ public class UrlFactory {
 		if( index >= srBIS.length ) {
 			throw new NoMoreTransportsException();
 		}
-		ServiceRecord sr = srBIS[index];
-		return ";deviceside=false;connectionUID="+sr.getUid();
+		if (CoverageInfo.isCoverageSufficient(CoverageInfo.COVERAGE_BIS_B))
+		{
+			return ";deviceside=false;ConnectionType=mds-public";
+		}
+		else
+		{
+			return null;
+		}
 	}
 	/**
 	 * Generates a connection parameter using the BES transport if available
@@ -281,9 +287,7 @@ public class UrlFactory {
 	 */
 	private String getWifiConnection() throws IOException {
 		if(  WLANInfo.getWLANState() == WLANInfo.WLAN_STATE_CONNECTED ) {
-			
 			return ";deviceside=true;interface=wifi";
-			
 		}
 		return null;
 	}
