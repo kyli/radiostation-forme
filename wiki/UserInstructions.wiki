@@ -3,7 +3,7 @@
 
 = Introduction =
 
-RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at ~~no cost~~. *Last.fm has just announced that its radio services will no longer be free. You must subscribe in order to use its personalized radio services.* However, a non-subscriber user will be able to listen to a maximum number of 30 songs, before trial period runs out.
+RadioStaion.ForMe (rs.fm) is designed as a [http://www.last.fm/ Last.fm] internet radio client. To use its personalized radio services, you must have an existing user account. If you don't have an account yet, you may [https://www.last.fm/join register] at no cost. *Last.fm has just announced that its radio services will no longer be free. You must subscribe in order to use its personalized radio services.* 
 
 = Details =
 
@@ -15,6 +15,6 @@ Now press the home key, select settings.
 
 Provide your Last.fm user information, and then click OK.
 
-You are now connected! You can now tune to your favourite station, and select play to start playing. 
+You are now connected! You can now tune (through menu) to your favourite station, and select play to start playing. 
 
 Happy Listening!
