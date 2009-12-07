@@ -19,12 +19,14 @@
 
 package fm.radiostation;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.microedition.io.HttpConnection;
 import javax.microedition.media.MediaException;
 
+import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
@@ -270,7 +272,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		String url = RSFMUtils.buildURL(ConnectionManager.SUBMISSION_ROOT_URL
 				+ ConnectionManager.SUBMISSION_HANDSHAKE, params);
 		handshake = (HandshakeResponse) connMan.getResponse(url, handler,
-				HttpConnection.GET);
+				null);
 		
 		if (handshake != null && handshake.isSuccess()) {
 			failureCounter = 0;
@@ -319,11 +321,16 @@ public class RSFMSession implements RadioPlayerEventListener {
 			params.put("l", tk.getDuration() == -1 ? "" : Integer.toString(tk.getDuration()));
 			params.put("n", "");
 			params.put("m", "");
-			String url = RSFMUtils.buildURL(handshake.getNowPlayingUrl()+"?",
-					params);
+			String url = handshake.getNowPlayingUrl();
+			Enumeration e = params.keys();
+			URLEncodedPostData postdata = new URLEncodedPostData(URLEncodedPostData.DEFAULT_CHARSET, false);
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				postdata.append(key, (String) params.get(key));
+			}
 			NowPlayingResponseHandler handler = new NowPlayingResponseHandler();
 			ResponseObject nowPlayingResponse = connMan.getResponse(url,
-					handler, HttpConnection.POST);
+					handler, postdata.getBytes()); 
 			if (nowPlayingResponse != null && nowPlayingResponse.isSuccess()) {
 				return true;
 			} else {
@@ -356,11 +363,16 @@ public class RSFMSession implements RadioPlayerEventListener {
 				params.put("m["+i+"]", "");
 			}
 			
-			String url = RSFMUtils.buildURL(handshake.getSubmissionUrl() + "?",
-					params);
+			String url = handshake.getSubmissionUrl();
+			Enumeration e = params.keys();
+			URLEncodedPostData postdata = new URLEncodedPostData(URLEncodedPostData.DEFAULT_CHARSET, false);
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				postdata.append(key, (String) params.get(key));
+			}
 			SubmissionResponseHandler handler = new SubmissionResponseHandler();
 			VerboseResponse submissionResponse = (VerboseResponse) connMan.getResponse(url,
-					handler, HttpConnection.POST);
+					handler, postdata.getBytes()); 
 			if (submissionResponse != null && submissionResponse.isSuccess()) {
 				queuedSubmittingTracks.removeAllElements();
 				return true;
@@ -529,7 +541,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 	
 	public EncodedImage fetchAlbumArt(String url) {
 		AlbumArtHandler handler = new AlbumArtHandler();
-		ResponseObject response = connMan.getResponse(url, handler, HttpConnection.GET);
+		ResponseObject response = connMan.getResponse(url, handler, null);
 		if (response != null && response.isSuccess()) {
 			return handler.getImage();
 		} else {

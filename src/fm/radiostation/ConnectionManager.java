@@ -21,11 +21,17 @@ package fm.radiostation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 
+import net.rim.blackberry.api.browser.URLEncodedPostData;
+import net.rim.device.api.io.http.HttpHeaders;
+import net.rim.device.api.system.Branding;
+import net.rim.device.api.system.DeviceInfo;
 import fm.radiostation.handler.ResponseHandler;
 
 /**
@@ -52,26 +58,62 @@ public final class ConnectionManager {
 	
 	public static final String SUBMISSION_ROOT_URL = "http://post.audioscrobbler.com/";
 	public static final String SUBMISSION_HANDSHAKE = "?hs=true&p=1.2.1&";
+	
+	public static final String USER_AGENT = "BlackBerry" + 
+		DeviceInfo.getDeviceName() + "/" + DeviceInfo.getSoftwareVersion() + 
+		" Profile/" + System.getProperty("microedition.profiles") + " Configuration/" + 
+		System.getProperty("microedition.configuration") + " VendorID/" + 
+		Branding.getVendorId();
 
 	private final UrlFactory servicemaster = 
 		new UrlFactory(UrlFactory.DEFAULT_TRANSPORT_ORDER);
 
 	public ResponseObject getXMLResponse(String api_key,
 			String method, Hashtable params, ResponseHandler handler, String httpMethod) {
-		String url = buildRESTRequestUrl(method, api_key, params);
-		return getResponse(url, handler, httpMethod);
+		String url;
+		byte[] postdata = null;
+		if (HttpConnection.POST.equals(httpMethod)) {
+			url = WEB_SERVICES_ROOT_URL;
+			URLEncodedPostData pd = new URLEncodedPostData(URLEncodedPostData.DEFAULT_CHARSET, false);
+			pd.append("method", method);
+			pd.append("api_key", api_key);
+			Enumeration e = params.keys();
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				pd.append(key, (String) params.get(key));
+			}
+			postdata = pd.getBytes();
+		} else { 
+			url = buildRESTRequestUrl(method, api_key, params);
+		}
+		return getResponse(url, handler, postdata);
 	}
 
 	public ResponseObject getResponse(String url,
-			ResponseHandler handler, String httpMethod) {
+			ResponseHandler handler, byte[] postdata) {
 		HttpConnection con = null;
 		InputStream in = null;
 		try {
 			url = servicemaster.appendRimConnectionParam(url, ";ConnectionTimeout=60000");
 			RSFMUtils.debug("Request sent to: "+url);
 			con = (HttpConnection) Connector.open(url);
-			con.setRequestMethod(httpMethod);
-
+			con.setRequestProperty(HttpHeaders.HEADER_USER_AGENT, USER_AGENT);
+			if (postdata == null) {
+				con.setRequestMethod(HttpConnection.GET);
+			} else {
+				con.setRequestMethod(HttpConnection.POST);
+				con.setRequestProperty(HttpHeaders.HEADER_CONTENT_TYPE, 
+						HttpHeaders.CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED);
+				con.setRequestProperty(HttpHeaders.HEADER_CONTENT_LENGTH, 
+						Integer.toString(postdata.length));
+				OutputStream out = null;
+				try {
+					out = con.openOutputStream();
+					out.write(postdata);
+				} finally {
+					out.close();
+				}
+			}
 			// HttpConnection state changes to Connected, getting the response
 			// code opens the connection.
 			int response = con.getResponseCode();
@@ -83,7 +125,6 @@ public final class ConnectionManager {
 				RSFMUtils.printRESTResponse(in, len);
 				throw new IOException();
 			}
-			
 //			int len = (int) con.getLength();
 //			RSFMUtils.printRESTResponse(in, len);
 			return handler.handle(in);
