@@ -19,7 +19,7 @@ AutoRestart=0
 ]
 [DependsOn
 ]
-Description=RadioStation.ForMe is an internet radio player and a scrobbler
+Description=RadioStation.ForMe is a Last.fm internet radio player
 ExcludeFromBuildAll=0
 [Files
 src\com\twmacinta\util\MD5.java
