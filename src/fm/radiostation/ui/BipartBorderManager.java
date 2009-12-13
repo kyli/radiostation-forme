@@ -56,19 +56,20 @@ public class BipartBorderManager extends Manager {
 	protected void sublayout(int width, int height) {
 		int x = 0;
 		int y = 0;
-		Field field = getField(0);
-		layoutChild(field, width, height);
-		setPositionChild(field, x, y);
+		Field field1 = getField(0);
+		layoutChild(field1, width, height);
+		setPositionChild(field1, x, y);
+		Field field;
 		if (isHorizontal) {
 			field = getField(1);
 			layoutChild(field, width, height);
 			setPositionChild(field, width-field.getWidth(), y);
-			setExtent(width, field.getHeight());
+			setExtent(width, Math.max(field1.getHeight(), field.getHeight()));
 		} else {
 			field = getField(1);
 			layoutChild(field, width, height);
 			setPositionChild(field, x, height-field.getHeight());
-			setExtent(field.getWidth(), height);
+			setExtent(Math.max(field1.getWidth(), field.getWidth()), height);
 		}
 	}
 
