@@ -27,10 +27,8 @@ import net.rim.device.api.ui.Manager;
  * manager will attempt to place two of its child components as farther apart as
  * possible, either horizontally or vertically, as specified at construction.
  * <p>
- * An instance of this layout manager <strong>must have exactly two child
- * components</strong>. Having less than two will throw an
- * IndexOutOfBoundException at runtime, and having more than two will result
- * incorrect rendering
+ * An instance of this layout manager <strong>have exactly two child
+ * components, as given in constructor</strong>.
  * 
  * @author kaiyi
  * 
@@ -39,20 +37,20 @@ public class BipartBorderManager extends Manager {
 
 	private final boolean isHorizontal;
 
-	protected BipartBorderManager(long style, boolean isHorizontal){
+	protected BipartBorderManager(long style, boolean isHorizontal, Field child1, Field child2){
 		super(style);
 		this.isHorizontal = isHorizontal;
+		super.add(child1);
+		super.add(child2);
 	}
 
 	/**
-	 * Adds given field to manager. An instance of this layout manager must have
-	 * exactly two child components. Having less than two will throw an
-	 * IndexOutOfBoundException at runtime, and having more than two will result
-	 * incorrect rendering. Therefore, {@link #add(Field)} must be invoked
-	 * exactly twice.
+	 * Calls to this method simply does nothing and returns immediatelly. This
+	 * field can only contain exactly 2 children fields, as given through
+	 * contructor.
 	 */
 	public void add(Field field) {
-		super.add(field);
+		return;
 	}
 
 	protected void sublayout(int width, int height) {
