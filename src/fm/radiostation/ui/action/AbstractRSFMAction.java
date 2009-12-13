@@ -35,10 +35,10 @@ abstract public class AbstractRSFMAction {
 	 * A reference of the RSFMSession object. It is accessible to all of its
 	 * child classes
 	 */
-	protected RSFMSession rsfmSession;
+	protected final RSFMSession session;
 
-	public AbstractRSFMAction(RSFMSession rsfmSession) {
-		this.rsfmSession = rsfmSession;
+	public AbstractRSFMAction(RSFMSession session) {
+		this.session = session;
 	}
 
 	/**

@@ -104,7 +104,7 @@ public class RadioPlayer implements PlayerListener {
 	/**
 	 * Stop current track.
 	 */
-	public void stop() throws MediaException {
+	public void stopCurrent() throws MediaException {
 		if (player != null) {
 			player.stop();
 		}
@@ -299,7 +299,7 @@ public class RadioPlayer implements PlayerListener {
 			
 			public void run() {
 				try {
-					stop();
+					stopCurrent();
 				} catch (MediaException e) {
 					e.printStackTrace();
 					player.removePlayerListener(TimeoutWatcher.this);

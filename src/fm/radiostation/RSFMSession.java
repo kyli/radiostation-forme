@@ -32,6 +32,9 @@ import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.util.Persistable;
 import net.rim.device.api.util.StringUtilities;
+import fm.radiostation.RSFMUtils;
+import fm.radiostation.ServiceEvent;
+import fm.radiostation.ServiceEventListener;
 import fm.radiostation.RSFMUtils.URLUTF8Encoder;
 import fm.radiostation.handler.AlbumArtHandler;
 import fm.radiostation.handler.HandshakeResponseHandler;
@@ -430,6 +433,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 					}
 				}
 				stopCurrentTrack();
+				fireWebServiceEvent(ServiceEvent.RADIO_TUNED);
 				return true;
 			}
 		}
@@ -439,13 +443,14 @@ public class RSFMSession implements RadioPlayerEventListener {
 	/**
 	 * fetch playlist from last.fm
 	 */
-	public boolean fetchPlayList() {
+	public void fetchPlayList() {
 		if (!mobileSession.isSubscriber()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.SUBSCRIBER_ONLY));
-			return false;
+			return;
 		}
 		if (radio == null) {
 			tune(Radio.DEFAULT_STATION);
+			return;
 		}
 		fireStatusEvent(new StatusEvent(StatusEvent.FETCHING_PLAYLIST));
 		
@@ -468,9 +473,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 				Radio.METHOD_RADIO_GETPLAYLIST, params, handler,
 				HttpConnection.POST);
 		if (playlist != null) {
-			return playlist.isSuccess();
-		} else {
-			return false;
+			fireWebServiceEvent(ServiceEvent.PLAYLIST_FETCHED);
 		}
 	}
 	
@@ -485,15 +488,16 @@ public class RSFMSession implements RadioPlayerEventListener {
 		radioPlayer.addRadioPlayerEventListener(this);
 		try {
 			radioPlayer.play(playlist);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		}
+			RSFMUtils.debug("Exception when trying to play radio: "+e.getMessage(), this);
+		} 
 	}
 	
 	/**
 	 * tells radio player to stop current track
 	 * 
-	 * @see RadioPlayer#stop()
+	 * @see RadioPlayer#stopCurrent()
 	 */
 	public void stopCurrentTrack() {
 		if (!radioPlayer.isPlaying())
@@ -502,7 +506,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		}
 		if (radioPlayer != null) {
 			try {
-				radioPlayer.stop();
+				radioPlayer.stopCurrent();
 			} catch (MediaException e) {
 				return;
 			} catch (Throwable e) {
@@ -516,13 +520,13 @@ public class RSFMSession implements RadioPlayerEventListener {
 	}
 	
 	/**
-	 * tells RadioPlayer to shutdown
+	 * attempts to shut down radio through radioplayer. if radio is off, then
+	 * calls to this method returns immediatelly.
 	 * 
 	 * @see RadioPlayer#shutdown()
 	 */
 	public void shutdownRadio() {
-		if (!radioPlayer.isPlaying())
-		{
+		if (!radioPlayer.isPlaying()) {
 			return;
 		}
 		if (radioPlayer != null) {
@@ -531,11 +535,10 @@ public class RSFMSession implements RadioPlayerEventListener {
 				radioPlayer.removeRadioPlayerEventListener(this);
 			} catch (Throwable e) {
 				e.printStackTrace();
+				RSFMUtils.debug("Exception when trying to shutdown radio: "+e.getMessage(), this);
 			}
 		} else {
-			RSFMUtils.debug("Attempt to turn off radio when there is no radio.");
-			throw new IllegalStateException(
-			"Attempt to turn off radio where radio is null");
+			throw new IllegalStateException("Attempt to turn off radio where radio is null");
 		}
 	}
 	
@@ -614,13 +617,35 @@ public class RSFMSession implements RadioPlayerEventListener {
 				submission(tk);
 			}
 			fireStatusEvent(new StatusEvent(""));
+		} else if (event.getEvent() == RadioPlayerEvent.RADIO_OFF) {
+			fireWebServiceEvent(ServiceEvent.RADIO_STOPPED);
 		}
 	} 
 
 	/*
+	 * web service event facilities
+	 */
+	private final Vector webserviceEventListeners = new Vector();
+	
+	public void addWebServiceListener(ServiceEventListener l) {
+		webserviceEventListeners.addElement(l);
+	}
+	
+	public void removeWebServiceListener(ServiceEventListener l) {
+		webserviceEventListeners.removeElement(l);
+	}
+	
+	private void fireWebServiceEvent(ServiceEvent event) {
+		for (int i = webserviceEventListeners.size() - 1; i >= 0; i--) {
+			((ServiceEventListener) webserviceEventListeners.elementAt(i))
+					.serviceStateChanged(event);
+		}
+	}
+	
+	/*
 	 * status event facilities
 	 */
-	private Vector statusEventListeners = new Vector();
+	private final Vector statusEventListeners = new Vector();
 
 	public void addStatusEventListener(StatusEventListener sel) {
 		statusEventListeners.addElement(sel);

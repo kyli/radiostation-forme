@@ -40,8 +40,8 @@ public class SettingConfigAction extends AbstractRSFMAction implements DialogClo
 	private TextField username;
 	private CheckboxField forceWifi;
 
-	public SettingConfigAction(RSFMSession rsfmSession) {
-		super(rsfmSession);
+	public SettingConfigAction(RSFMSession session) {
+		super(session);
 	}
 
 	public void run() {
@@ -80,7 +80,7 @@ public class SettingConfigAction extends AbstractRSFMAction implements DialogClo
 					public void dialogClosed(Dialog dialog, int choice) {
 						if (choice == Dialog.OK) {
 							settings.close();
-							rsfmSession.cleanup();
+							session.cleanup();
 						}
 					}
 				});
@@ -91,9 +91,9 @@ public class SettingConfigAction extends AbstractRSFMAction implements DialogClo
 	}
 
 	private void loadSettings() {
-		String name = rsfmSession.getUsername();
+		String name = session.getUsername();
 		username.setText(name == null ? "" : name);
-		String pwd = rsfmSession.getPassword();
+		String pwd = session.getPassword();
 		password.setText(pwd == null ? "" : pwd);
 	}
 
@@ -103,12 +103,12 @@ public class SettingConfigAction extends AbstractRSFMAction implements DialogClo
 				String name = username.getText();
 				String pwd = password.getText();
 				UrlFactory.forceWifi = forceWifi.getChecked();
-				rsfmSession.saveSettings(name, pwd);
-				rsfmSession.loadSettings();
+				session.saveSettings(name, pwd);
+				session.loadSettings();
 				Thread th = new Thread() {
 					public void run() {
-						rsfmSession.fetchMobileSession();
-						rsfmSession.handshake();
+						session.fetchMobileSession();
+						session.handshake();
 					}
 				};
 				th.start();
