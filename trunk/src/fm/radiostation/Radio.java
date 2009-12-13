@@ -25,7 +25,7 @@ public class Radio extends ResponseObject {
 	public static final String METHOD_RADIO_TUNE = "radio.tune";
 	public static final String METHOD_RADIO_GETPLAYLIST = "radio.getplaylist";
 	
-	public static String DEFAULT_STATION = "lastfm://globaltags/dance";
+	public static final String DEFAULT_STATION = "lastfm://globaltags/dance";
 	
 	private String type;
 	private String name;

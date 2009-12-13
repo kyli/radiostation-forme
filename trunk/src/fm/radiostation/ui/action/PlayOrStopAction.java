@@ -21,7 +21,6 @@ package fm.radiostation.ui.action;
 
 import fm.radiostation.Playlist;
 import fm.radiostation.RSFMSession;
-import fm.radiostation.Radio;
 import fm.radiostation.ServiceEvent;
 import fm.radiostation.ServiceEventListener;
 import fm.radiostation.player.RadioPlayer;
@@ -90,7 +89,7 @@ public class PlayOrStopAction extends AbstractRSFMAction implements
 		public void run() {
 			session.addWebServiceListener(runner);
 			if (session.getRadio() == null) {
-				session.tune(Radio.DEFAULT_STATION);
+				session.tune(session.getPreviousStation());
 			} else {
 				Playlist playlist = session.getPlaylist();
 				if (playlist == null || playlist.getTracklist().isEmpty()) {

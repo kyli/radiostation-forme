@@ -104,6 +104,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 	private MobileSession mobileSession;
 	private HandshakeResponse handshake;
 	private String authToken;
+	private String station;
 	
 	/*
 	 * modules for http connection and streamed content
@@ -169,14 +170,16 @@ public class RSFMSession implements RadioPlayerEventListener {
 		synchronized (store) {
 			RSFMHashMap currentinfo = (RSFMHashMap) store.getContents();
 			if (currentinfo != null) {
-				String station = (String) currentinfo.get("station");
-				if (station != null) {
-					Radio.DEFAULT_STATION = station;
+				station = (String) currentinfo.get("station");
+				if (station == null) {
+					station = Radio.DEFAULT_STATION;
 				}
 				queuedSubmittingTracks = (Vector) currentinfo.get("queuedtracks");
 				if (queuedSubmittingTracks == null) {
 					queuedSubmittingTracks = new Vector();
 				}
+			} else {
+				station = Radio.DEFAULT_STATION;
 			}
 		}
 	}
@@ -188,7 +191,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		PersistentObject store = PersistentStore.getPersistentObject(StringUtilities
 				.stringHashToLong(sessionsKey));
 		RSFMHashMap userinfo = new RSFMHashMap(2);
-		userinfo.put("station", Radio.DEFAULT_STATION);
+		userinfo.put("station", station);
 		userinfo.put("queuedtracks", queuedSubmittingTracks);
 		synchronized(store) {
 			store.setContents(userinfo); 
@@ -202,6 +205,8 @@ public class RSFMSession implements RadioPlayerEventListener {
 	public void cleanup() {
 		username = null;
 		password = null;
+		station = Radio.DEFAULT_STATION;
+		queuedSubmittingTracks.removeAllElements();
 		PersistentStore.destroyPersistentObject(StringUtilities
 				.stringHashToLong(settingsKey));
 		PersistentStore.destroyPersistentObject(StringUtilities
@@ -431,7 +436,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		radio = (Radio) connMan.getXMLResponse(api_key,
 				Radio.METHOD_RADIO_TUNE, params, handler,
 				HttpConnection.POST);
-		Radio.DEFAULT_STATION = station;
+		this.station = station;
 		if (radio != null && radio.isSuccess()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.TUNED_TO + " "
 					+ radio.getName()));
@@ -460,7 +465,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 			return;
 		}
 		if (radio == null) {
-			tune(Radio.DEFAULT_STATION);
+			tune(station);
 			return;
 		}
 		fireStatusEvent(new StatusEvent(StatusEvent.FETCHING_PLAYLIST));
@@ -692,6 +697,10 @@ public class RSFMSession implements RadioPlayerEventListener {
 	
 	public String getPassword() {
 		return password;
+	}
+	
+	public String getPreviousStation() {
+		return station;
 	}
 
 	/**
