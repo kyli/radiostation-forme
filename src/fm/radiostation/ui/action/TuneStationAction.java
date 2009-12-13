@@ -68,13 +68,17 @@ public class TuneStationAction extends AbstractRSFMAction implements DialogClose
 			stationUrl = getRecommendedStationURL(username);
 			session.tune(stationUrl);
 		} else if (choice == 3) {
-			String username = session.getUsername();
-			if (username == null) {
-				return;
+			String username = stationField.getText();
+			if (username.length() == 0) {
+				username = session.getUsername();
 			}
-			stationUrl = getNeighbourStationURL(username);
+			stationUrl = getUserStationURL(username);
 			session.tune(stationUrl);
 		}
+	}
+
+	private static String getUserStationURL(String username) {
+		return "lastfm://user/"+username+"/library";
 	}
 
 	private static String getArtistStationURL(String artist) {
@@ -85,9 +89,9 @@ public class TuneStationAction extends AbstractRSFMAction implements DialogClose
 		return "lastfm://globaltags/" + tag;
 	}
 	
-	private static String getNeighbourStationURL(String user) {
-		return "lastfm://user/" + user + "/neighbours";
-	}
+//	private static String getNeighbourStationURL(String user) {
+//		return "lastfm://user/" + user + "/neighbours";
+//	}
 	
 	private static String getRecommendedStationURL(String user) {
 		return "lastfm://user/" + user + "/recommended";

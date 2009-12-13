@@ -19,6 +19,6 @@ TuneStationAction_Main_SpecifyStation#0="Specify a station to tune into.";
 TuneStationAction_Main_StationName#0="Station Name";
 TuneStationAction_Station_Type_Artist#0="Artist";
 TuneStationAction_Station_Type_Cancel#0="Cancel";
-TuneStationAction_Station_Type_Heighbour#0="Neighbourhood";
 TuneStationAction_Station_Type_Recommended#0="Recommended";
 TuneStationAction_Station_Type_Tag#0="Tag";
+TuneStationAction_Station_Type_UserLibrary#0="User Library";
