@@ -273,15 +273,17 @@ RadioPlayerEventListener {
 		if (event.getEvent() == RadioPlayerEvent.TRACK_STARTED) {
 			UiApplication.getUiApplication().invokeLater(new Runnable() {
 				public void run() {
-					Track tk = event.getTrack();
-					timeElapsed.setText("0");
-					int dur = (int) (rsfmSession.getRadioPlayer().getDuration() / 1000000);
-					trackName.setText(tk.getTitle());
-					artistName.setText(tk.getCreator());
-					duration.setText(RSFMUtils.timeFromSeconds(dur));
-					albumName.setText(tk.getAlbum()==null ? "" : tk.getAlbum());
-					audioPlaybackControl.setText(bsrb.getString(2));
-					playOrStop.setBitmap(stopIcon);
+					if (rsfmSession.getRadioPlayer().isPlaying()) {
+						Track tk = event.getTrack();
+						timeElapsed.setText("0");
+						int dur = (int) (rsfmSession.getRadioPlayer().getDuration() / 1000000);
+						trackName.setText(tk.getTitle());
+						artistName.setText(tk.getCreator());
+						duration.setText(RSFMUtils.timeFromSeconds(dur));
+						albumName.setText(tk.getAlbum()==null ? "" : tk.getAlbum());
+						audioPlaybackControl.setText(bsrb.getString(2));
+						playOrStop.setBitmap(stopIcon);
+					}
 				}
 			});
 			PlaybackTimer playbackTimer = new PlaybackTimer();
@@ -311,8 +313,12 @@ RadioPlayerEventListener {
 				public void run() {
 					audioPlaybackControl.setText(bsrb.getString(1));
 					playOrStop.setBitmap(playIcon);
+					trackName.setText(bsrb.getString(13));
+					albumName.setText(bsrb.getString(12));
+					artistName.setText(bsrb.getString(0));
 				}
 			});
+			updateAlbumImage(defaultAlbumArt);
 		}  
 	}
 	

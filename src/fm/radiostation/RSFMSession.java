@@ -323,8 +323,11 @@ public class RSFMSession implements RadioPlayerEventListener {
 	
 	/**
 	 * Updates nowPlaying information
+	 * <p>
+	 * if handshake has not yet performed, then request is ignored. if the request
+	 * fails, then handshake is performed once again.
 	 */
-	public boolean nowPlaying(Track tk) {
+	public void nowPlaying(Track tk) {
 		if (handshake != null) {
 			Hashtable params = new Hashtable(7);
 			params.put("s", handshake.getSessionID());
@@ -344,21 +347,18 @@ public class RSFMSession implements RadioPlayerEventListener {
 			NowPlayingResponseHandler handler = new NowPlayingResponseHandler();
 			ResponseObject nowPlayingResponse = connMan.getResponse(url,
 					handler, postdata.getBytes()); 
-			if (nowPlayingResponse != null && nowPlayingResponse.isSuccess()) {
-				return true;
-			} else {
+			if (nowPlayingResponse == null || !nowPlayingResponse.isSuccess()) {
 				handshake();
-				return false;
-			}
-		} else {
-			return false;
-		}
+			} 
+		} 
 	}
 	
 	/**
 	 * submits listened track information to last.fm
+	 * <p>
+	 * if handshake is not yet performed, then attempts to handshake instead.
 	 */
-	public boolean submission(Track tk) {
+	public void submission(Track tk) {
 		queuedSubmittingTracks.addElement(tk);
 		if (handshake != null) {
 			Hashtable params = new Hashtable(10);
@@ -388,14 +388,11 @@ public class RSFMSession implements RadioPlayerEventListener {
 					handler, postdata.getBytes()); 
 			if (submissionResponse != null && submissionResponse.isSuccess()) {
 				queuedSubmittingTracks.removeAllElements();
-				return true;
 			} else {
 				handleFailure(submissionResponse);
-				return false;
 			}
 		} else {
 			handshake();
-			return false;
 		}
 	}
 
@@ -516,22 +513,22 @@ public class RSFMSession implements RadioPlayerEventListener {
 	
 	/**
 	 * tells radio player to stop current track
+	 * <p>
+	 * if the radio is not playing, then request is ignored.
 	 * 
 	 * @see RadioPlayer#stopCurrent()
 	 */
 	public void stopCurrentTrack() {
-		if (!radioPlayer.isPlaying())
-		{
+		if (!radioPlayer.isPlaying()) {
 			return;
 		}
 		if (radioPlayer != null) {
 			try {
 				radioPlayer.stopCurrent();
 			} catch (MediaException e) {
-				return;
-			} catch (Throwable e) {
 				e.printStackTrace();
-			}
+				RSFMUtils.debug("Exception when trying to stop current track: "+e.getMessage(), this);
+			} 
 		} else {
 			RSFMUtils.debug("Attempt to stop radio when there is no radio.");
 			throw new IllegalStateException(
@@ -620,10 +617,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		} else if (event.getEvent() == RadioPlayerEvent.TRACK_STARTED) {
 			if (event.getTrack() != null) {
 				Track tk = event.getTrack();
-				boolean success = nowPlaying(tk);
-				if (!success) {
-					handshake();
-				}
+				nowPlaying(tk);
 			}
 			fireStatusEvent(new StatusEvent(StatusEvent.LISTENING_TO + " "
 					+ radio.getName()));
