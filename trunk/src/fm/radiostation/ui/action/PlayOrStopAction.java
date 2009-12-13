@@ -22,61 +22,105 @@ package fm.radiostation.ui.action;
 import fm.radiostation.Playlist;
 import fm.radiostation.RSFMSession;
 import fm.radiostation.Radio;
+import fm.radiostation.ServiceEvent;
+import fm.radiostation.ServiceEventListener;
 import fm.radiostation.player.RadioPlayer;
 
-public class PlayOrStopAction extends AbstractRSFMAction {
+/**
+ * the activation of this action effectively starts or stops the radio depending
+ * on the current application service state.
+ * <p>
+ * if the radio is playing, then it is stopped. otherwise, it will start to play
+ * as soon as all necessary resources are aquired.
+ * 
+ * @author kaiyi
+ * 
+ */
+public class PlayOrStopAction extends AbstractRSFMAction implements
+		ServiceEventListener {
 
-	// small hack prevents multiple threads from spawning and invoke run() many times.
-	private boolean isActive;
+	/**
+	 * instance-controlled runner that is capable of starting the radio
+	 */
+	private RadioRunner runner;
 
-	public PlayOrStopAction(RSFMSession rsfmSession) {
-		super(rsfmSession);
+	public PlayOrStopAction(RSFMSession session) {
+		super(session);
+		session.addWebServiceListener(this);
 	}
 
+	/**
+	 * attempts to start or stop the radio depending on service state
+	 */
 	public void run() {
-		RadioPlayer player = rsfmSession.getRadioPlayer();
+		RadioPlayer player = session.getRadioPlayer();
 		if (player == null || !player.isPlaying()) {
-			if (isActive) {
-				return;
+			if (runner == null) {
+				runner = new RadioRunner();
+				runner.start();
+			}
+		} else {
+			session.shutdownRadio();
+		}
+	}
+
+	/**
+	 * listens for web services state changes.
+	 * <p>
+	 * clear the runner so that it can be constructed again to start the radio
+	 */
+	public void serviceStateChanged(ServiceEvent event) {
+		if (event == ServiceEvent.RADIO_STOPPED) {
+			runner.cleanup();
+			runner = null;
+		}
+	}
+
+	/**
+	 * runner thread that responsible of starting the radio. if any of the
+	 * resources needed to start the radio (i.e. radio object, playlist) is not
+	 * ready, it is acquired before the radio starts.
+	 * 
+	 * @author kaiyi
+	 * 
+	 */
+	private class RadioRunner extends Thread implements
+			ServiceEventListener {
+		
+		public void run() {
+			session.addWebServiceListener(this);
+			if (session.getRadio() == null) {
+				session.tune(Radio.DEFAULT_STATION);
 			} else {
-				isActive = true;
-			}
-			Thread th = new Thread() {
-				public void run() {
-					try {
-						play();
-					} finally {
-						isActive = false;
-					}
+				Playlist playlist = session.getPlaylist();
+				if (playlist == null || playlist.getTracklist().isEmpty()) {
+					session.fetchPlayList();
 				}
-			};
-			th.start();
-		} else {
-			stop();
-		}
-	}
-
-	private void play() {
-		boolean success = false;
-		if (rsfmSession.getRadio() == null) {
-			success = rsfmSession.tune(Radio.DEFAULT_STATION);
-		} else {
-			success = true;
-		}
-		if (success) {
-			Playlist playlist = rsfmSession.getPlaylist();
-			if (playlist == null) {
-				success = rsfmSession.fetchPlayList();
-			} else if (playlist.getTracklist().isEmpty()) {
-				success = rsfmSession.fetchPlayList();
-			}
-			if (success) {
-				rsfmSession.playRadio();
 			}
 		}
-	}
 
-	private void stop() {
-		rsfmSession.shutdownRadio();
+		/**
+		 * listens for service changes. plays radio when all necessary resources
+		 * are acquired.
+		 */
+		public void serviceStateChanged(ServiceEvent event) {
+			if (event == ServiceEvent.RADIO_TUNED) {
+				Playlist playlist = session.getPlaylist();
+				if (playlist == null || playlist.getTracklist().isEmpty()) {
+					session.fetchPlayList();
+				}
+			} else if (event == ServiceEvent.PLAYLIST_FETCHED) {
+				session.playRadio();
+				session.removeWebServiceListener(this);
+			}
+		}
+
+		/**
+		 * removed previously attached listener and clean up necessary
+		 * resources.
+		 */
+		public void cleanup() {
+			session.removeWebServiceListener(this);
+		}
 	}
 }

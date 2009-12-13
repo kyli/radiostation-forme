@@ -25,8 +25,8 @@ import fm.radiostation.Version;
 
 public class AboutAction extends AbstractRSFMAction {
 
-	public AboutAction(RSFMSession rsfmSession) {
-		super(rsfmSession);
+	public AboutAction(RSFMSession session) {
+		super(session);
 	}
 
 	public void run() {

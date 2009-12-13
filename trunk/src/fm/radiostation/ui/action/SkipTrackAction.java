@@ -23,11 +23,11 @@ import fm.radiostation.RSFMSession;
 
 public class SkipTrackAction extends AbstractRSFMAction {
 
-	public SkipTrackAction(RSFMSession rsfmSession) {
-		super(rsfmSession);
+	public SkipTrackAction(RSFMSession session) {
+		super(session);
 	}
 
 	public void run() {
-		rsfmSession.stopCurrentTrack();
+		session.stopCurrentTrack();
 	}
 }

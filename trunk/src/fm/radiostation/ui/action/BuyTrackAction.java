@@ -31,12 +31,12 @@ import fm.radiostation.Track;
 
 public class BuyTrackAction extends AbstractRSFMAction {
 	
-	public BuyTrackAction (RSFMSession rsfmSession) {
-		super(rsfmSession);
+	public BuyTrackAction (RSFMSession session) {
+		super(session);
 	}
 
 	public void run() {
-		Playlist playlist = rsfmSession.getPlaylist();
+		Playlist playlist = session.getPlaylist();
 		if (playlist == null) {
 			return;
 		}

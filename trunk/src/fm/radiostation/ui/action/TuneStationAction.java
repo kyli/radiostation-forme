@@ -30,8 +30,8 @@ public class TuneStationAction extends AbstractRSFMAction implements DialogClose
 
 	private TextField stationField;
 
-	public TuneStationAction(RSFMSession rsfmSession) {
-		super(rsfmSession);
+	public TuneStationAction(RSFMSession session) {
+		super(session);
 	}
 
 	public void run() {
@@ -56,24 +56,24 @@ public class TuneStationAction extends AbstractRSFMAction implements DialogClose
 		String stationUrl;
 		if (choice == 0) {
 			stationUrl = getArtistStationURL(stationField.getText());
-			rsfmSession.tune(stationUrl);
+			session.tune(stationUrl);
 		} else if (choice == 1) {
 			stationUrl = getTagStationURL(stationField.getText());
-			rsfmSession.tune(stationUrl);
+			session.tune(stationUrl);
 		} else if (choice == 2) {
-			String username = rsfmSession.getUsername();
+			String username = session.getUsername();
 			if (username == null) {
 				return;
 			}
 			stationUrl = getRecommendedStationURL(username);
-			rsfmSession.tune(stationUrl);
+			session.tune(stationUrl);
 		} else if (choice == 3) {
-			String username = rsfmSession.getUsername();
+			String username = session.getUsername();
 			if (username == null) {
 				return;
 			}
 			stationUrl = getNeighbourStationURL(username);
-			rsfmSession.tune(stationUrl);
+			session.tune(stationUrl);
 		}
 	}
 

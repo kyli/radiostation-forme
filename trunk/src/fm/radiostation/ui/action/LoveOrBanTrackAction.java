@@ -31,13 +31,13 @@ public class LoveOrBanTrackAction extends AbstractRSFMAction {
 
 	private final boolean isLove;
 
-	public LoveOrBanTrackAction(RSFMSession rsfmSession, boolean isLove) {
-		super(rsfmSession);
+	public LoveOrBanTrackAction(RSFMSession session, boolean isLove) {
+		super(session);
 		this.isLove = isLove;
 	}
 
 	public void run() {
-		Playlist playlist = rsfmSession.getPlaylist();
+		Playlist playlist = session.getPlaylist();
 		if (playlist == null || playlist.getTracklist().isEmpty()) {
 			return;
 		}
@@ -46,9 +46,9 @@ public class LoveOrBanTrackAction extends AbstractRSFMAction {
 			track.setRating(Track.LOVE);
 		} else {
 			track.setRating(Track.BAN);
-			rsfmSession.stopCurrentTrack();
+			session.stopCurrentTrack();
 		}
-		rsfmSession.loveOrBanTrack(track, isLove ? LOVE_METHOD : BAN_METHOD);
+		session.loveOrBanTrack(track, isLove ? LOVE_METHOD : BAN_METHOD);
 	}
 
 }
