@@ -36,6 +36,7 @@ import net.rim.device.api.ui.UiApplication;
 import net.rim.device.api.ui.component.BitmapField;
 import net.rim.device.api.ui.component.LabelField;
 import net.rim.device.api.ui.component.Menu;
+import net.rim.device.api.ui.component.NullField;
 import net.rim.device.api.ui.component.SeparatorField;
 import net.rim.device.api.ui.component.TextField;
 import net.rim.device.api.ui.container.HorizontalFieldManager;
@@ -192,7 +193,7 @@ RadioPlayerEventListener {
 				true, timeElapsed, duration);
 		BipartBorderManager controlButtonPanel = new BipartBorderManager(
 				Manager.NO_HORIZONTAL_SCROLL | Manager.NO_VERTICAL_SCROLL,
-				true, new LabelField(""), buttonGrp);
+				true, new NullField(), buttonGrp);
 		lower.add(controlButtonPanel);
 		lower.add(new SeparatorField(SeparatorField.LINE_HORIZONTAL));
 		lower.add(playTimeBar);
