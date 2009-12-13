@@ -48,6 +48,8 @@ src\fm\radiostation\ResponseObject.java
 src\fm\radiostation\rsfm.keys
 src\fm\radiostation\RSFMSession.java
 src\fm\radiostation\RSFMUtils.java
+src\fm\radiostation\ServiceEvent.java
+src\fm\radiostation\ServiceEventListener.java
 src\fm\radiostation\StatusEvent.java
 src\fm\radiostation\StatusEventListener.java
 src\fm\radiostation\Track.java
