@@ -119,8 +119,6 @@ RadioPlayerEventListener {
 		// ui setup
 		MarginalManager mm = new MarginalManager(Manager.NO_HORIZONTAL_SCROLL
 				| Manager.NO_VERTICAL_SCROLL, 10);
-		BipartBorderManager bbm = new BipartBorderManager(Manager.NO_HORIZONTAL_SCROLL
-				| Manager.NO_VERTICAL_SCROLL, false);
 
 		HorizontalFieldManager trackDetailContainer = new HorizontalFieldManager();
 		defaultAlbumArt = Bitmap
@@ -169,7 +167,6 @@ RadioPlayerEventListener {
 				| Manager.NO_VERTICAL_SCROLL, 3);
 		mm2.add(right1);
 		trackDetailContainer.add(mm2);
-		bbm.add(trackDetailContainer);
 
 		VerticalFieldManager lower = new VerticalFieldManager(
 				VerticalFieldManager.NO_SCROLL_RESET);
@@ -177,9 +174,6 @@ RadioPlayerEventListener {
 		duration = new LabelField();
 		timeElapsed.setFont(detailsFont);
 		duration.setFont(detailsFont);
-		BipartBorderManager controlButtonPanel = new BipartBorderManager(
-				Manager.NO_HORIZONTAL_SCROLL | Manager.NO_VERTICAL_SCROLL, true);
-		controlButtonPanel.add(new LabelField(""));
 		HorizontalFieldManager buttonGrp = new HorizontalFieldManager();
 		IconButton buy = new IconButton(Bitmap.getBitmapResource("cart.png"), buyTrackAction);
 		IconButton skip = new IconButton(Bitmap.getBitmapResource("control_end.png"), skipTrackAction);
@@ -194,14 +188,16 @@ RadioPlayerEventListener {
 		buttonGrp.add(love);
 		buttonGrp.add(ban);
 		BipartBorderManager playTimeBar = new BipartBorderManager(
-				Manager.NO_HORIZONTAL_SCROLL | Manager.NO_VERTICAL_SCROLL, true);
-		playTimeBar.add(timeElapsed);
-		playTimeBar.add(duration);
-		controlButtonPanel.add(buttonGrp);
+				Manager.NO_HORIZONTAL_SCROLL | Manager.NO_VERTICAL_SCROLL,
+				true, timeElapsed, duration);
+		BipartBorderManager controlButtonPanel = new BipartBorderManager(
+				Manager.NO_HORIZONTAL_SCROLL | Manager.NO_VERTICAL_SCROLL,
+				true, new LabelField(""), buttonGrp);
 		lower.add(controlButtonPanel);
 		lower.add(new SeparatorField(SeparatorField.LINE_HORIZONTAL));
 		lower.add(playTimeBar);
-		bbm.add(lower);
+		BipartBorderManager bbm = new BipartBorderManager(Manager.NO_HORIZONTAL_SCROLL
+				| Manager.NO_VERTICAL_SCROLL, false, trackDetailContainer, lower);
 
 		audioPlaybackControl = new RSFMMenuItem(bsrb, 1, 1, 1, playOrStopAction);
 		skipTrackControl = new RSFMMenuItem(bsrb, 6, 2, 2, skipTrackAction);
