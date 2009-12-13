@@ -571,7 +571,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 	/**
 	 * submits request to indicate love or ban a track
 	 */
-	public boolean loveOrBanTrack(Track track, String method) {
+	public void loveOrBanTrack(Track track, String method) {
 		String title = track.getTitle();
 		String creator = track.getCreator();
 		String sk = mobileSession.getSk();
@@ -593,10 +593,8 @@ public class RSFMSession implements RadioPlayerEventListener {
 		ResponseObject response = connMan.getXMLResponse(api_key, method, params, handler, HttpConnection.POST);
 		if (response != null && response.isSuccess()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.USER_PROFILE_UPDATED));
-			return true;
 		} else {
 			fireStatusEvent(new StatusEvent(StatusEvent.CONNECTION_ERROR));
-			return false;
 		}
 	}
 	
