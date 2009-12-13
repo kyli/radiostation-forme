@@ -36,10 +36,6 @@ public class ServiceEvent {
 	 */
 	public static final ServiceEvent HANDSHAKE_COMPLETED = new ServiceEvent();
 	/**
-	 * radio started playing
-	 */
-	public static final ServiceEvent RADIO_PLAYED = new ServiceEvent();
-	/**
 	 * radio stopped
 	 */
 	public static final ServiceEvent RADIO_STOPPED = new ServiceEvent();
