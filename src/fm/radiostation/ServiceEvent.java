@@ -28,6 +28,14 @@ package fm.radiostation;
 public class ServiceEvent {
 	
 	/**
+	 * mobile session has been acquired
+	 */
+	public static final ServiceEvent SESSION_ACQUIRED = new ServiceEvent();
+	/**
+	 * handshake completed with lastfm radio services
+	 */
+	public static final ServiceEvent HANDSHAKE_COMPLETED = new ServiceEvent();
+	/**
 	 * radio started playing
 	 */
 	public static final ServiceEvent RADIO_PLAYED = new ServiceEvent();

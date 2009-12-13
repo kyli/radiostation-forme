@@ -32,9 +32,6 @@ import net.rim.device.api.system.PersistentObject;
 import net.rim.device.api.system.PersistentStore;
 import net.rim.device.api.util.Persistable;
 import net.rim.device.api.util.StringUtilities;
-import fm.radiostation.RSFMUtils;
-import fm.radiostation.ServiceEvent;
-import fm.radiostation.ServiceEventListener;
 import fm.radiostation.RSFMUtils.URLUTF8Encoder;
 import fm.radiostation.handler.AlbumArtHandler;
 import fm.radiostation.handler.HandshakeResponseHandler;
@@ -211,14 +208,20 @@ public class RSFMSession implements RadioPlayerEventListener {
 				.stringHashToLong(sessionsKey));
 		fireStatusEvent(new StatusEvent(StatusEvent.USER_INFO_CLEARED));
 	}
-	
+
 	/**
 	 * Authenticate through <a href="http://www.last.fm/api/mobileauth">Last.fm
-	 * Authentication API</a>, and wrap the session response into a MobileSession object.
+	 * Authentication API</a> and create the mobile user session.
+	 * <p>
+	 * If either username or password information is unavailable, return
+	 * immediatelly. When mobile session is successfully created,
+	 * {@link ServiceEvent#SESSION_ACQUIRED} is fired. An observer should be
+	 * registered as a {@link ServiceEventListener} if wish to be notified when
+	 * mobile session is successfuly created.
 	 */
-	public boolean fetchMobileSession() {
+	public void fetchMobileSession() {
 		if (username == null || password == null) {
-			return false;
+			return;
 		}
 		authToken = RSFMUtils.md5(username + RSFMUtils.md5(password));
 
@@ -240,26 +243,29 @@ public class RSFMSession implements RadioPlayerEventListener {
 				MobileSession.METHOD, params, handler,
 				HttpConnection.POST);
 		if (mobileSession != null && mobileSession.isSuccess()) {
-			return true; 
-		} else {
-			return false;
-		}
+			fireWebServiceEvent(ServiceEvent.SESSION_ACQUIRED);
+		} 
 	}
 	
 	/**
-	 * Perform handshake with the submission API
-	 * @return true if the handshake was successful
+	 * Perform handshake with the submission API.
+	 * <p>
+	 * if user information is unavailable or previous failure does not permit
+	 * immediate request, then call to this method is ignored. if handshake is
+	 * successful, then {@link ServiceEvent#HANDSHAKE_COMPLETED} and
+	 * {@link StatusEvent#HANDSHAKE_SUCCESSFUL} are fired to notify the service
+	 * and ui layers respectively.
 	 */
-	public boolean handshake() {
+	public void handshake() {
 		if (username == null || password == null) {
-			return false;
+			return;
 		} else if (failureCounter > 0) {
 			if (System.currentTimeMillis() < lastFailTime
 					+ RSFMUtils.simplePow(2, failureCounter) * 60000) {
-				return false;
+				return;
 			}
 		}
-		String timestamp = Long.toString(System.currentTimeMillis()/1000);
+		String timestamp = Long.toString(System.currentTimeMillis() / 1000);
 		String authToken = RSFMUtils.md5(RSFMUtils.md5(password)+timestamp);
 		
 		Hashtable params = new Hashtable(5);
@@ -279,18 +285,22 @@ public class RSFMSession implements RadioPlayerEventListener {
 		
 		if (handshake != null && handshake.isSuccess()) {
 			failureCounter = 0;
+			fireWebServiceEvent(ServiceEvent.HANDSHAKE_COMPLETED);
 			fireStatusEvent(new StatusEvent(StatusEvent.HANDSHAKE_SUCCESSFUL));
-			return true;
 		} else {
 			if (handshake != null) { 
 				handleFailure(handshake);
 			} else {
 				fireStatusEvent(new StatusEvent(StatusEvent.CONNECTION_ERROR));
 			}
-			return false;
 		}
 	}
 
+	/**
+	 * handles failure result from communication with lastfm api.
+	 * 
+	 * @param response response describes failure
+	 */
 	private void handleFailure(VerboseResponse response) {
 		if (response.getResponseMessage() == null) {
 			fireStatusEvent(new StatusEvent(StatusEvent.CONNECTION_ERROR));
@@ -388,60 +398,64 @@ public class RSFMSession implements RadioPlayerEventListener {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * tune to specified station
+	 * <p>
+	 * if user is not permitted to access radio (i.e. not subscribed) or session has
+	 * not yet been created, then the request to this method is ignored. upon success,
+	 * {@link ServiceEvent#RADIO_TUNED} is fired.
 	 */
-	public boolean tune(String station) {
+	public void tune(String station) {
 		if (!mobileSession.isSubscriber()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.SUBSCRIBER_ONLY));
-			return false;
+			return;
 		}
-		boolean success = true;
-		if (mobileSession == null) {
-			success = fetchMobileSession();
+		else if (mobileSession == null) {
+			fetchMobileSession();
+			return;
 		}
-		if (success) {
-			Vector paramList = new Vector();
-			paramList.addElement("api_key" + api_key);
-			paramList.addElement("lang" + Version.LANGUAGE);
-			paramList.addElement("method" + Radio.METHOD_RADIO_TUNE);
-			paramList.addElement("sk" + mobileSession.getSk());
-			paramList.addElement("station" + station);
-			String api_sig = RSFMUtils.createApiSignature(paramList, secret);
-			
-			Hashtable params = new Hashtable();
-			params.put("lang", Version.LANGUAGE);
-			params.put("station", station);
-			params.put("sk", mobileSession.getSk());
-			params.put("api_sig", api_sig);
-			
-			fireStatusEvent(new StatusEvent(StatusEvent.CONNECTING_TO_RADIO));
-			TuneResponseHandler handler = new TuneResponseHandler();
-			radio = (Radio) connMan.getXMLResponse(api_key,
-					Radio.METHOD_RADIO_TUNE, params, handler,
-					HttpConnection.POST);
-			Radio.DEFAULT_STATION = station;
-			if (radio != null && radio.isSuccess()) {
-				fireStatusEvent(new StatusEvent(StatusEvent.TUNED_TO + " "
-						+ radio.getName()));
-				// Remove all tracks on playlist after the current track,
-				// because the player has tuned the radio
-				if (playlist != null) {
-					for (int i = 1; i < playlist.getTracklist().size(); i++) {
-						playlist.getTracklist().removeElementAt(i);
-					}
+		Vector paramList = new Vector();
+		paramList.addElement("api_key" + api_key);
+		paramList.addElement("lang" + Version.LANGUAGE);
+		paramList.addElement("method" + Radio.METHOD_RADIO_TUNE);
+		paramList.addElement("sk" + mobileSession.getSk());
+		paramList.addElement("station" + station);
+		String api_sig = RSFMUtils.createApiSignature(paramList, secret);
+
+		Hashtable params = new Hashtable();
+		params.put("lang", Version.LANGUAGE);
+		params.put("station", station);
+		params.put("sk", mobileSession.getSk());
+		params.put("api_sig", api_sig);
+
+		fireStatusEvent(new StatusEvent(StatusEvent.CONNECTING_TO_RADIO));
+		TuneResponseHandler handler = new TuneResponseHandler();
+		radio = (Radio) connMan.getXMLResponse(api_key,
+				Radio.METHOD_RADIO_TUNE, params, handler,
+				HttpConnection.POST);
+		Radio.DEFAULT_STATION = station;
+		if (radio != null && radio.isSuccess()) {
+			fireStatusEvent(new StatusEvent(StatusEvent.TUNED_TO + " "
+					+ radio.getName()));
+			// Remove all tracks on playlist after the current track,
+			// because the player has tuned the radio
+			if (playlist != null) {
+				for (int i = 1; i < playlist.getTracklist().size(); i++) {
+					playlist.getTracklist().removeElementAt(i);
 				}
-				stopCurrentTrack();
-				fireWebServiceEvent(ServiceEvent.RADIO_TUNED);
-				return true;
 			}
+			stopCurrentTrack();
+			fireWebServiceEvent(ServiceEvent.RADIO_TUNED);
 		}
-		return false;
 	}
 
 	/**
 	 * fetch playlist from last.fm
+	 * <p>
+	 * if user is not permitted to access radio (i.e. not subscribed) or radio has
+	 * not yet been initialized, then the request to this method is ignored. upon success,
+	 * {@link ServiceEvent#PLAYLIST_FETCHED} is fired.
 	 */
 	public void fetchPlayList() {
 		if (!mobileSession.isSubscriber()) {
@@ -476,13 +490,19 @@ public class RSFMSession implements RadioPlayerEventListener {
 			fireWebServiceEvent(ServiceEvent.PLAYLIST_FETCHED);
 		}
 	}
-	
+
 	/**
 	 * play radio as soon as possible
+	 * <p>
+	 * if user is not permitted to access radio (i.e. not subscribed) or
+	 * playlist is not available, then the request to this method is ignored.
 	 */
 	public void playRadio() {
 		if (!mobileSession.isSubscriber()) {
 			fireStatusEvent(new StatusEvent(StatusEvent.SUBSCRIBER_ONLY));
+			return;
+		}
+		if (playlist == null) {
 			return;
 		}
 		radioPlayer.addRadioPlayerEventListener(this);
@@ -532,11 +552,10 @@ public class RSFMSession implements RadioPlayerEventListener {
 		if (radioPlayer != null) {
 			try {
 				radioPlayer.shutdown();
-				radioPlayer.removeRadioPlayerEventListener(this);
 			} catch (Throwable e) {
 				e.printStackTrace();
 				RSFMUtils.debug("Exception when trying to shutdown radio: "+e.getMessage(), this);
-			}
+			} 
 		} else {
 			throw new IllegalStateException("Attempt to turn off radio where radio is null");
 		}
@@ -603,10 +622,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 				Track tk = event.getTrack();
 				boolean success = nowPlaying(tk);
 				if (!success) {
-					success = handshake();
-					if (!success) {
-						fireStatusEvent(new StatusEvent(StatusEvent.CONNECTION_ERROR));
-					} 
+					handshake();
 				}
 			}
 			fireStatusEvent(new StatusEvent(StatusEvent.LISTENING_TO + " "
@@ -618,6 +634,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 			}
 			fireStatusEvent(new StatusEvent(""));
 		} else if (event.getEvent() == RadioPlayerEvent.RADIO_OFF) {
+			radioPlayer.removeRadioPlayerEventListener(this);
 			fireWebServiceEvent(ServiceEvent.RADIO_STOPPED);
 		}
 	} 
@@ -665,7 +682,6 @@ public class RSFMSession implements RadioPlayerEventListener {
 	/*
 	 * uninteresting getters
 	 */
-	
 	public Playlist getPlaylist() {
 		return playlist;
 	}

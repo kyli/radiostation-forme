@@ -22,16 +22,20 @@ package fm.radiostation.ui;
 
 import net.rim.device.api.ui.UiApplication;
 import fm.radiostation.RSFMSession;
+import fm.radiostation.ServiceEvent;
+import fm.radiostation.ServiceEventListener;
 
 /**
  * Main entry point of rs.fm. It is the application itself. After all the ui
- * components are initialized and rendered, the main thread will become the event
- * dispatching thread and become responsible for ui updates and event processing.
+ * components are initialized and rendered, the main thread will become the
+ * event dispatching thread and become responsible for ui updates and event
+ * processing.
  * 
  * @author kaiyi
  * 
  */
-public final class RSFMMainFrame extends UiApplication {
+public final class RSFMMainFrame extends UiApplication implements
+		ServiceEventListener {
 
 	private RSFMBaseScreen mainScreen;
 	private RSFMSession rsfmSession;
@@ -51,8 +55,8 @@ public final class RSFMMainFrame extends UiApplication {
 		// operation.
 		Thread rsfmConnector = new Thread() {
 			public void run() {
+				rsfmSession.addWebServiceListener(RSFMMainFrame.this);
 				rsfmSession.fetchMobileSession();
-				rsfmSession.handshake();
 			}
 		};
 		rsfmConnector.start();
@@ -64,5 +68,17 @@ public final class RSFMMainFrame extends UiApplication {
 	public static void main(String[] args) {
 		RSFMMainFrame rsfm = new RSFMMainFrame();
 		rsfm.enterEventDispatcher();
+	}
+
+	/**
+	 * processes the service state change event. perform handshake when 
+	 * session is acquired.
+	 */
+	public void serviceStateChanged(ServiceEvent event) {
+		if (event == ServiceEvent.SESSION_ACQUIRED) {
+			rsfmSession.handshake();
+		} else if (event == ServiceEvent.HANDSHAKE_COMPLETED) {
+			rsfmSession.removeWebServiceListener(this);
+		}
 	}
 }

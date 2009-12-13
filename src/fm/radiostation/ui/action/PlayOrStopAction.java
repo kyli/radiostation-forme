@@ -71,7 +71,7 @@ public class PlayOrStopAction extends AbstractRSFMAction implements
 	 */
 	public void serviceStateChanged(ServiceEvent event) {
 		if (event == ServiceEvent.RADIO_STOPPED) {
-			runner.cleanup();
+			session.removeWebServiceListener(runner);
 			runner = null;
 		}
 	}
@@ -88,7 +88,7 @@ public class PlayOrStopAction extends AbstractRSFMAction implements
 			ServiceEventListener {
 		
 		public void run() {
-			session.addWebServiceListener(this);
+			session.addWebServiceListener(runner);
 			if (session.getRadio() == null) {
 				session.tune(Radio.DEFAULT_STATION);
 			} else {
@@ -110,17 +110,9 @@ public class PlayOrStopAction extends AbstractRSFMAction implements
 					session.fetchPlayList();
 				}
 			} else if (event == ServiceEvent.PLAYLIST_FETCHED) {
-				session.playRadio();
 				session.removeWebServiceListener(this);
+				session.playRadio();
 			}
-		}
-
-		/**
-		 * removed previously attached listener and clean up necessary
-		 * resources.
-		 */
-		public void cleanup() {
-			session.removeWebServiceListener(this);
 		}
 	}
 }
