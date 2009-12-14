@@ -59,7 +59,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 	/**
 	 * client identifier that identifies RadioStation.ForMe with last.fm
 	 */
-	private static final String CLIENT_ID = "rsf";
+	private static final String CLIENT_ID;
 	
 	/*
 	 * key to access persistent store. these keys are private keys and are
@@ -82,6 +82,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 			secret = (String) ht.get("secret");
 			settingsKey = (String) ht.get("settingKey");
 			sessionsKey = (String) ht.get("sessionsKey");
+			CLIENT_ID = (String) ht.get("clientid");
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error: Unable to load rsfm.keys.");
