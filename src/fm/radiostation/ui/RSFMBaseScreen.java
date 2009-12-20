@@ -171,8 +171,8 @@ RadioPlayerEventListener {
 
 		VerticalFieldManager lower = new VerticalFieldManager(
 				VerticalFieldManager.NO_SCROLL_RESET);
-		timeElapsed = new LabelField();
-		duration = new LabelField();
+		timeElapsed = new LabelField("00:00");
+		duration = new LabelField("00:00");
 		timeElapsed.setFont(detailsFont);
 		duration.setFont(detailsFont);
 		HorizontalFieldManager buttonGrp = new HorizontalFieldManager();
@@ -272,7 +272,7 @@ RadioPlayerEventListener {
 				public void run() {
 					if (rsfmSession.getRadioPlayer().isPlaying()) {
 						Track tk = event.getTrack();
-						timeElapsed.setText("0");
+						timeElapsed.setText("00:00");
 						int dur = (int) (rsfmSession.getRadioPlayer().getDuration() / 1000000);
 						trackName.setText(tk.getTitle());
 						artistName.setText(tk.getCreator());
