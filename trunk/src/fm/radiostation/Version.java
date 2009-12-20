@@ -22,7 +22,9 @@ package fm.radiostation;
 
 import java.util.Hashtable;
 
-public class Version {
+import net.rim.device.api.util.StringUtilities;
+
+public final class Version {
 	
 	/**
 	 * Name of the Last.fm radio player
@@ -52,4 +54,43 @@ public class Version {
 		}
 	}
 
+	/**
+	 * compare a version number in string representation with current
+	 * application version.
+	 * <p>
+	 * version number is in the format <tt>a.b.c.d...</tt> where a is the major
+	 * release number, b is minor release number and etc.
+	 * 
+	 * @param version
+	 *            to be compared to in string representation
+	 * @return 1 if application version is newer than version being compared to,
+	 *         -1 if application version is older than version compared to, and
+	 *         0 if two versions are the same
+	 */
+	public static int compareTo(String version) {
+		if (version == null) {
+			throw new NullPointerException();
+		} else {
+			String[] existing = StringUtilities.stringToWords(PLAYER_VERSION);
+			String[] comparedto = StringUtilities.stringToWords(version);
+			for (int i = 0; i < existing.length && i < comparedto.length; i++) {
+				int existingvd = Integer.parseInt(existing[i]);
+				int comparedtovd = Integer.parseInt(comparedto[i]);
+				if (existingvd > comparedtovd) {
+					return 1;
+				} else if (comparedtovd > existingvd) {
+					return -1;
+				}
+			}
+			if (existing.length > comparedto.length) {
+				return 1;
+			} else if (comparedto.length > existing.length) {
+				return -1;
+			} else {
+				return 0;
+			}
+		}
+	}
+	
+	private Version() { throw new Error(); }
 }
