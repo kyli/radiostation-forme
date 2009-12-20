@@ -143,7 +143,13 @@ public final class RSFMUtils {
 		while (true) {
 			try {
 				String ln = new String(lr.readLine());
+				if (ln.charAt(0) == '#') {
+					continue; // skip comments
+				}
 				int pos = ln.indexOf('=');
+				if (pos == -1) {
+					continue;
+				}
 				String param = ln.substring(0, pos);
 				String val = ln.substring(pos + 1);
 				properties.put(param, val);
@@ -324,4 +330,6 @@ public final class RSFMUtils {
 			return sbuf.toString();
 		}
 	}
+	
+	private RSFMUtils() { throw new Error(); }
 }
