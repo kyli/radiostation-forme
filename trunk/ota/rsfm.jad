@@ -1,23 +1,23 @@
 Manifest-Version: 1.0
 MIDlet-Version: 0.1
-MIDlet-Jar-Size: 163132
+MIDlet-Jar-Size: 159524
 MicroEdition-Configuration: CLDC-1.1
 MIDlet-Jar-URL: radiostation-forme.jar
-RIM-COD-Module-Dependencies: net_rim_cldc,net_rim_satsa,net_rim_xml_org,net_rim_jaxrpc,net_rim_os,net_rim_bbapi_browser
+RIM-COD-Module-Dependencies: net_rim_cldc,net_rim_satsa,net_rim_bbapi_browser,net_rim_xml_org,net_rim_jaxrpc,net_rim_os
 RIM-COD-URL-1: rsfm-1.cod
 RIM-MIDlet-Icon-1-0: src/icons/logo.png,focused
-RIM-COD-SHA1-1: 46 cc 3a f1 78 30 ca 60 90 66 23 43 57 44 47 a2 04 d3 52 34
+RIM-COD-SHA1-1: df 76 02 10 4f 2e e8 72 ac 74 16 a4 47 e0 88 26 1b 59 3a d8
 RIM-MIDlet-Flags-1: 0
 RIM-COD-Module-Name: rsfm
-RIM-COD-Size-1: 4296
-RIM-COD-Size: 75732
+RIM-COD-Size-1: 5864
+RIM-COD-Size: 67676
 MIDlet-Name: radiostation-forme
-RIM-COD-Creation-Time: 1257621164
+RIM-COD-Creation-Time: 1261274503
 MIDlet-1: rsfm,,
 RIM-COD-URL: rsfm.cod
 MIDlet-Description: A Last.fm radio player
 RIM-MIDlet-NameResourceId-1: 0
-RIM-COD-SHA1: fa a1 47 9d a0 ac 02 b1 1d 58 c5 f4 59 65 bf 91 fb d4 fc 2d
+RIM-COD-SHA1: 8f b1 0b b1 f4 c2 80 9f 9b b0 6c a5 45 bd 08 d8 3f 19 1c d7
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Vendor: Kaiyi Li
 RIM-MIDlet-Icon-Count-1: 1
