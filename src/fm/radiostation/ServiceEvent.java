@@ -48,5 +48,18 @@ public class ServiceEvent {
 	 */
 	public static final ServiceEvent PLAYLIST_FETCHED = new ServiceEvent();
 	
+	/**
+	 * software update available
+	 */
+	public static final ServiceEvent UPDATE_AVAILABLE = new ServiceEvent();
+	/**
+	 * no available software update
+	 */
+	public static final ServiceEvent UPDATE_UNAVAILABLE = new ServiceEvent();
+	/**
+	 * update process failed due to either network difficulties or other reasons
+	 */
+	public static final ServiceEvent UPDATE_FAILED = new ServiceEvent();
+	
 	private ServiceEvent() {};
 }

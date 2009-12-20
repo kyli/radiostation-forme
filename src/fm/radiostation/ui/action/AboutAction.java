@@ -34,6 +34,9 @@ public class AboutAction extends AbstractRSFMAction {
 				"by Kaiyi Li\n\n" +
 				"RadioStation.ForMe (rs.fm) is free software. Please visit project page for any latest updates.\n" +
 				"http://code.google.com/p/radiostation-forme/";
-		Dialog.inform(message);
+		int choice = Dialog.ask(message, new String[] {"Dismiss", "Check Update"}, 0);
+		if (choice == 1) {
+			(new Thread(new CheckUpdateAction(session))).start();
+		}
 	}
 }

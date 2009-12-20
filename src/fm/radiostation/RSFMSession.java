@@ -26,6 +26,8 @@ import java.util.Vector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.media.MediaException;
 
+import net.rim.blackberry.api.browser.Browser;
+import net.rim.blackberry.api.browser.BrowserSession;
 import net.rim.blackberry.api.browser.URLEncodedPostData;
 import net.rim.device.api.system.EncodedImage;
 import net.rim.device.api.system.PersistentObject;
@@ -37,6 +39,7 @@ import fm.radiostation.handler.AlbumArtHandler;
 import fm.radiostation.handler.HandshakeResponseHandler;
 import fm.radiostation.handler.NowPlayingResponseHandler;
 import fm.radiostation.handler.SubmissionResponseHandler;
+import fm.radiostation.handler.UpdateHandler;
 import fm.radiostation.handler.xml.MobileSessionHandler;
 import fm.radiostation.handler.xml.PlaylistHandler;
 import fm.radiostation.handler.xml.SimpleResponseHandler;
@@ -60,6 +63,10 @@ public class RSFMSession implements RadioPlayerEventListener {
 	 * client identifier that identifies RadioStation.ForMe with last.fm
 	 */
 	private static final String CLIENT_ID;
+	/**
+	 * url to remote version file to check for new version
+	 */
+	private static final String CHECK_UPDATE_URL = "http://radiostation-forme.googlecode.com/svn/trunk/src/fm/radiostation/version.properties";
 	
 	/*
 	 * key to access persistent store. these keys are private keys and are
@@ -106,6 +113,10 @@ public class RSFMSession implements RadioPlayerEventListener {
 	private HandshakeResponse handshake;
 	private String authToken;
 	private String station;
+	/**
+	 * points to rsfm.jad file when a new software update is available
+	 */
+	private String updateurl;
 	
 	/*
 	 * modules for http connection and streamed content
@@ -249,7 +260,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 				MobileSession.METHOD, params, handler,
 				HttpConnection.POST);
 		if (mobileSession != null && mobileSession.isSuccess()) {
-			fireWebServiceEvent(ServiceEvent.SESSION_ACQUIRED);
+			fireServiceEvent(ServiceEvent.SESSION_ACQUIRED);
 		} 
 	}
 	
@@ -291,7 +302,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		
 		if (handshake != null && handshake.isSuccess()) {
 			failureCounter = 0;
-			fireWebServiceEvent(ServiceEvent.HANDSHAKE_COMPLETED);
+			fireServiceEvent(ServiceEvent.HANDSHAKE_COMPLETED);
 			fireStatusEvent(new StatusEvent(StatusEvent.HANDSHAKE_SUCCESSFUL));
 		} else {
 			if (handshake != null) { 
@@ -449,7 +460,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 				}
 			}
 			stopCurrentTrack();
-			fireWebServiceEvent(ServiceEvent.RADIO_TUNED);
+			fireServiceEvent(ServiceEvent.RADIO_TUNED);
 		}
 	}
 
@@ -490,7 +501,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 				Radio.METHOD_RADIO_GETPLAYLIST, params, handler,
 				HttpConnection.POST);
 		if (playlist != null) {
-			fireWebServiceEvent(ServiceEvent.PLAYLIST_FETCHED);
+			fireServiceEvent(ServiceEvent.PLAYLIST_FETCHED);
 		}
 	}
 
@@ -633,9 +644,39 @@ public class RSFMSession implements RadioPlayerEventListener {
 			fireStatusEvent(new StatusEvent(""));
 		} else if (event.getEvent() == RadioPlayerEvent.RADIO_OFF) {
 			radioPlayer.removeRadioPlayerEventListener(this);
-			fireWebServiceEvent(ServiceEvent.RADIO_STOPPED);
+			fireServiceEvent(ServiceEvent.RADIO_STOPPED);
 		}
 	} 
+	
+	/**
+	 * checks for update by getting the version number from svn head. if the
+	 * current version is older than the version in svn head, then fire events
+	 * to notify updates availability.
+	 */
+	public void checkupdate() {
+		UpdateResponse updateresponse = (UpdateResponse) connMan.getResponse(
+				CHECK_UPDATE_URL, new UpdateHandler(), null);
+		if (updateresponse == null) {
+			fireServiceEvent(ServiceEvent.UPDATE_FAILED);
+		} else if (Version.compareTo(updateresponse.getVersion()) < 0) {
+			updateurl = updateresponse.getUpdateurl();
+			fireServiceEvent(ServiceEvent.UPDATE_AVAILABLE);
+		} else {
+			fireServiceEvent(ServiceEvent.UPDATE_UNAVAILABLE);
+		}
+	}
+
+	/**
+	 * download update ota via default blackberry browser handle
+	 * <p>
+	 * update url must point to .jad file
+	 */
+	public void update() {
+		BrowserSession session = Browser.getDefaultSession();
+		session.displayPage(updateurl);
+		cleanup();
+		System.exit(0);
+	}
 
 	/*
 	 * web service event facilities
@@ -650,7 +691,7 @@ public class RSFMSession implements RadioPlayerEventListener {
 		webserviceEventListeners.removeElement(l);
 	}
 	
-	private void fireWebServiceEvent(ServiceEvent event) {
+	private void fireServiceEvent(ServiceEvent event) {
 		for (int i = webserviceEventListeners.size() - 1; i >= 0; i--) {
 			((ServiceEventListener) webserviceEventListeners.elementAt(i))
 					.serviceStateChanged(event);

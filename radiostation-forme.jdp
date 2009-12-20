@@ -30,6 +30,7 @@ src\fm\radiostation\handler\HandshakeResponseHandler.java
 src\fm\radiostation\handler\NowPlayingResponseHandler.java
 src\fm\radiostation\handler\ResponseHandler.java
 src\fm\radiostation\handler\SubmissionResponseHandler.java
+src\fm\radiostation\handler\UpdateHandler.java
 src\fm\radiostation\handler\xml\MobileSessionHandler.java
 src\fm\radiostation\handler\xml\PlaylistHandler.java
 src\fm\radiostation\handler\xml\RESTResponseHandler.java
@@ -56,6 +57,7 @@ src\fm\radiostation\Track.java
 src\fm\radiostation\ui\action\AboutAction.java
 src\fm\radiostation\ui\action\AbstractRSFMAction.java
 src\fm\radiostation\ui\action\BuyTrackAction.java
+src\fm\radiostation\ui\action\CheckUpdateAction.java
 src\fm\radiostation\ui\action\LoveOrBanTrackAction.java
 src\fm\radiostation\ui\action\PlayOrStopAction.java
 src\fm\radiostation\ui\action\SettingConfigAction.java
@@ -69,6 +71,7 @@ src\fm\radiostation\ui\RSFMBaseScreen.java
 src\fm\radiostation\ui\RSFMMainFrame.java
 src\fm\radiostation\ui\RSFMMenuItem.java
 src\fm\radiostation\ui\RSFMResource.java
+src\fm\radiostation\UpdateResponse.java
 src\fm\radiostation\UrlFactory.java
 src\fm\radiostation\VerboseResponse.java
 src\fm\radiostation\Version.java
@@ -110,4 +113,4 @@ TitleResourceBundleName=Messages
 TitleResourceBundlePath=src\fm\radiostation\ui\Messages.rrh
 Type=0
 Vendor=Kaiyi Li
-Version=0.1
+Version=0.2
